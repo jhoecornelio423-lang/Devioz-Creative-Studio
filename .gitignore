@@ -1,0 +1,24 @@
+﻿# Sesiones y temporales
+admin/storage/sessions/*
+!admin/storage/sessions/.gitignore
+*.tmp
+*.log
+
+# Bases de datos temporales / locales
+*.db
+*.sqlite
+*.sqlite3
+
+# Sistema operativo
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# IDEs y editores
+.vscode/
+.idea/
+*.sublime-project
+*.sublime-workspace
+
+# Antigravity CLI / Gemini
+.gemini/

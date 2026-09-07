@@ -1,0 +1,450 @@
+/* ==========================================================================
+   DEVIOZ CREATIVE STUDIO - ADMIN PANEL STYLESHEET
+   Palette: Devioz Official Brand Spectrum
+   ========================================================================== */
+
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700&family=Inter:wght@400;500;600&display=swap');
+
+:root {
+  --devioz-primary: #00c2c2;
+  --devioz-primary-hover: #00d4d4;
+  --devioz-dark: #001a1a;
+  --devioz-dark-secondary: #002b2b;
+  --devioz-teal-deep: #004d4d;
+  --devioz-teal: #14b8a6;
+  --devioz-white: #ffffff;
+  --devioz-gray: #9ca3af;
+  --devioz-border: rgba(0, 194, 194, 0.2);
+  --devioz-danger: #ef4444;
+  --devioz-success: #25d366;
+  --devioz-warning: #f59e0b;
+
+  --sidebar-width: 260px;
+  --font-heading: 'Outfit', sans-serif;
+  --font-body: 'Inter', sans-serif;
+}
+
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: var(--font-body);
+  background-color: var(--devioz-dark);
+  color: var(--devioz-white);
+  line-height: 1.5;
+  display: flex;
+  min-height: 100vh;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+/* --- SIDEBAR --- */
+.sidebar {
+  width: var(--sidebar-width);
+  background-color: var(--devioz-dark-secondary);
+  border-right: 1px solid var(--devioz-border);
+  display: flex;
+  flex-direction: column;
+  position: fixed;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  z-index: 100;
+}
+
+.sidebar-header {
+  padding: 1.25rem 1.25rem;
+  border-bottom: 1px solid var(--devioz-border);
+  font-family: var(--font-heading);
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: var(--devioz-white);
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+}
+
+.sidebar-logo-3d {
+  width: 42px;
+  height: 42px;
+  border-radius: 10px;
+  object-fit: cover;
+  border: 1px solid rgba(0, 194, 194, 0.45);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5), 0 0 10px rgba(0, 194, 194, 0.25);
+  display: block;
+  flex-shrink: 0;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.sidebar-header:hover .sidebar-logo-3d {
+  transform: scale(1.06);
+  box-shadow: 0 4px 16px rgba(0, 194, 194, 0.45);
+}
+
+.sidebar-brand-text {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.15;
+}
+
+.sidebar-brand-text span {
+  color: var(--devioz-primary);
+  font-size: 0.8rem;
+  font-weight: 600;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+}
+
+.sidebar-menu {
+  list-style: none;
+  padding: 1.25rem 0.75rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  flex-grow: 1;
+}
+
+.sidebar-menu a {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.75rem 1rem;
+  border-radius: 8px;
+  font-family: var(--font-heading);
+  font-size: 0.95rem;
+  font-weight: 500;
+  color: var(--devioz-gray);
+  transition: all 0.2s ease;
+}
+
+.sidebar-menu a:hover,
+.sidebar-menu a.active {
+  background: rgba(0, 194, 194, 0.12);
+  color: var(--devioz-primary);
+  border-left: 3px solid var(--devioz-primary);
+}
+
+.sidebar-footer {
+  padding: 1rem 1.25rem;
+  border-top: 1px solid var(--devioz-border);
+  font-size: 0.85rem;
+  color: var(--devioz-gray);
+}
+
+/* --- MAIN WRAPPER & TOP NAVBAR --- */
+.main-wrapper {
+  margin-left: var(--sidebar-width);
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.top-navbar {
+  height: 64px;
+  background-color: var(--devioz-dark-secondary);
+  border-bottom: 1px solid var(--devioz-border);
+  padding: 0 2rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.top-navbar .user-info {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.top-navbar .user-email {
+  font-size: 0.9rem;
+  color: var(--devioz-gray);
+}
+
+.btn-logout {
+  background: rgba(239, 68, 68, 0.15);
+  color: var(--devioz-danger);
+  border: 1px solid rgba(239, 68, 68, 0.3);
+  padding: 0.4rem 0.9rem;
+  border-radius: 6px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  transition: all 0.2s ease;
+}
+
+.btn-logout:hover {
+  background: var(--devioz-danger);
+  color: #fff;
+}
+
+/* --- CONTENT CONTAINER --- */
+.content {
+  padding: 2rem;
+  flex-grow: 1;
+}
+
+.page-title-box {
+  margin-bottom: 2rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.page-title {
+  font-family: var(--font-heading);
+  font-size: 1.8rem;
+  font-weight: 700;
+}
+
+/* --- STATS GRID --- */
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1.5rem;
+  margin-bottom: 2.5rem;
+}
+
+.stat-card {
+  background: var(--devioz-dark-secondary);
+  border: 1px solid var(--devioz-border);
+  border-radius: 12px;
+  padding: 1.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.stat-card .stat-info h3 {
+  font-size: 0.875rem;
+  color: var(--devioz-gray);
+  margin-bottom: 0.4rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.stat-card .stat-info .stat-number {
+  font-family: var(--font-heading);
+  font-size: 2.2rem;
+  font-weight: 800;
+  color: var(--devioz-primary);
+}
+
+/* --- TABLES --- */
+.table-container {
+  background: var(--devioz-dark-secondary);
+  border: 1px solid var(--devioz-border);
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.admin-table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+}
+
+.admin-table th,
+.admin-table td {
+  padding: 1rem 1.25rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.admin-table th {
+  background: rgba(0, 0, 0, 0.3);
+  font-family: var(--font-heading);
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--devioz-primary);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.admin-table tr:hover {
+  background: rgba(0, 194, 194, 0.03);
+}
+
+/* --- BADGES & STATUS --- */
+.badge {
+  display: inline-block;
+  padding: 0.25rem 0.6rem;
+  border-radius: 50px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+.badge-success { background: rgba(37, 211, 102, 0.15); color: var(--devioz-success); border: 1px solid var(--devioz-success); }
+.badge-danger { background: rgba(239, 68, 68, 0.15); color: var(--devioz-danger); border: 1px solid var(--devioz-danger); }
+.badge-warning { background: rgba(245, 158, 11, 0.15); color: var(--devioz-warning); border: 1px solid var(--devioz-warning); }
+.badge-info { background: rgba(0, 194, 194, 0.15); color: var(--devioz-primary); border: 1px solid var(--devioz-primary); }
+
+/* --- BUTTONS --- */
+.btn-admin {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.6rem 1.2rem;
+  font-family: var(--font-heading);
+  font-size: 0.9rem;
+  font-weight: 600;
+  border-radius: 6px;
+  border: none;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btn-admin-primary { background: var(--devioz-primary); color: var(--devioz-dark); }
+.btn-admin-primary:hover { background: var(--devioz-primary-hover); }
+
+.btn-admin-sm { padding: 0.35rem 0.7rem; font-size: 0.8rem; }
+.btn-admin-secondary { background: rgba(255,255,255,0.1); color: #fff; }
+.btn-admin-secondary:hover { background: rgba(255,255,255,0.2); }
+
+.table-actions {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  flex-wrap: wrap;
+}
+
+.inline-form {
+  display: inline-block;
+  margin: 0;
+  padding: 0;
+}
+
+/* --- FORMS & MODALS --- */
+.admin-card {
+  background: var(--devioz-dark-secondary);
+  border: 1px solid var(--devioz-border);
+  border-radius: 12px;
+  padding: 2rem;
+  margin-bottom: 2rem;
+}
+
+.form-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1.25rem;
+}
+
+.form-group-admin {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.form-group-admin.full { grid-column: span 2; }
+
+.form-group-admin label {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--devioz-white);
+}
+
+.form-control-admin {
+  background: var(--devioz-dark);
+  border: 1px solid var(--devioz-border);
+  border-radius: 6px;
+  padding: 0.75rem 1rem;
+  color: #fff;
+  font-family: var(--font-body);
+  font-size: 0.9rem;
+  outline: none;
+}
+
+.form-control-admin:focus {
+  border-color: var(--devioz-primary);
+  box-shadow: 0 0 8px rgba(0, 194, 194, 0.3);
+}
+
+textarea.form-control-admin { min-height: 100px; resize: vertical; }
+
+/* --- ALERTS --- */
+.alert-admin {
+  padding: 1rem 1.25rem;
+  border-radius: 8px;
+  margin-bottom: 1.5rem;
+  font-size: 0.9rem;
+}
+
+.alert-admin-success { background: rgba(37, 211, 102, 0.15); border: 1px solid var(--devioz-success); color: var(--devioz-success); }
+.alert-admin-danger { background: rgba(239, 68, 68, 0.15); border: 1px solid var(--devioz-danger); color: var(--devioz-danger); }
+
+/* --- LOGIN PAGE --- */
+.login-body {
+  background: var(--devioz-dark);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  width: 100%;
+}
+
+.login-card {
+  width: 100%;
+  max-width: 420px;
+  background: var(--devioz-dark-secondary);
+  border: 1px solid var(--devioz-border);
+  border-radius: 16px;
+  padding: 2.5rem 2rem;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.6);
+}
+
+.login-logo {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.85rem;
+  text-align: center;
+  margin-bottom: 2rem;
+}
+
+.login-logo-3d {
+  width: 76px;
+  height: 76px;
+  border-radius: 18px;
+  object-fit: cover;
+  border: 2px solid rgba(0, 194, 194, 0.45);
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.6), 0 0 20px rgba(0, 194, 194, 0.3);
+  display: block;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.login-logo-3d:hover {
+  transform: scale(1.05) translateY(-2px);
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.7), 0 0 25px rgba(0, 194, 194, 0.4);
+}
+
+.login-brand-text {
+  font-family: var(--font-heading);
+  font-size: 1.6rem;
+  font-weight: 800;
+  color: var(--devioz-white);
+  line-height: 1.2;
+}
+
+.login-brand-text span {
+  color: var(--devioz-primary);
+}
+
+/* --- ANIMACIÓN FILAS EN TIEMPO REAL (SIN RECARGA / SIN F5) --- */
+@keyframes rowHighlight {
+  0% {
+    background-color: rgba(0, 194, 194, 0.35);
+  }
+  100% {
+    background-color: transparent;
+  }
+}
+
+.new-row-pulse {
+  animation: rowHighlight 2.2s ease-out;
+}
+
