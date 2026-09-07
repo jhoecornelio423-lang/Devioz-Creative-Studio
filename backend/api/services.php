@@ -15,10 +15,21 @@ try {
     $pdo = getPDOConnection();
     
     $stmt = $pdo->prepare("
-        SELECT id, titulo, slug, descripcion, imagen, beneficios, estado 
-        FROM servicios 
-        WHERE estado = 1 
-        ORDER BY id ASC
+        SELECT 
+            s.id, 
+            s.categoria_id, 
+            c.nombre AS categoria_nombre, 
+            c.slug AS categoria_slug, 
+            s.titulo, 
+            s.slug, 
+            s.descripcion, 
+            s.imagen, 
+            s.beneficios, 
+            s.estado 
+        FROM servicios s
+        LEFT JOIN categorias c ON s.categoria_id = c.id
+        WHERE s.estado = 1 
+        ORDER BY s.id ASC
     ");
     $stmt->execute();
     $services = $stmt->fetchAll();

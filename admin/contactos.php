@@ -25,8 +25,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     if ($postAction === 'update_status' && $id > 0 && isValidStatus($newStatus, $allowedStatuses)) {
         try {
-            $stmt = $pdo->prepare("UPDATE contactos SET estado = :estado WHERE id = :id");
-            $stmt->execute(['estado' => $newStatus, 'id' => $id]);
+            $adminId = $_SESSION['admin_user']['id'] ?? null;
+            $stmt = $pdo->prepare("UPDATE contactos SET estado = :estado, atendido_por = :atendido_por WHERE id = :id");
+            $stmt->execute([
+                'estado'       => $newStatus,
+                'atendido_por' => $adminId,
+                'id'           => $id
+            ]);
             $_SESSION['flash_message'] = "El estado de la solicitud #{$id} fue actualizado a '{$newStatus}'.";
             header("Location: contactos.php?action=view&id={$id}");
             exit;
@@ -55,24 +60,39 @@ $selectedContact = null;
 // PROCESAR DETALLE GET (SOLO LECTURA / VISTA DETALLADA)
 if ($action === 'view' && isset($_GET['id'])) {
     $id = (int)$_GET['id'];
-    $stmt = $pdo->prepare("SELECT * FROM contactos WHERE id = :id");
+    $stmt = $pdo->prepare("
+        SELECT c.*, s.titulo AS servicio_oficial, u.nombre AS admin_nombre, u.email AS admin_email 
+        FROM contactos c 
+        LEFT JOIN servicios s ON c.servicio_id = s.id 
+        LEFT JOIN usuarios u ON c.atendido_por = u.id 
+        WHERE c.id = :id
+    ");
     $stmt->execute(['id' => $id]);
     $selectedContact = $stmt->fetch();
 
-    // Si estaba como nuevo, marcar automáticamente en_proceso al revisar
+    // Si estaba como nuevo, marcar automáticamente en_proceso al revisar y asignar al usuario actual
     if ($selectedContact && $selectedContact['estado'] === 'nuevo') {
         try {
-            $stmtUp = $pdo->prepare("UPDATE contactos SET estado = 'en_proceso' WHERE id = :id");
-            $stmtUp->execute(['id' => $id]);
+            $adminId = $_SESSION['admin_user']['id'] ?? null;
+            $stmtUp = $pdo->prepare("UPDATE contactos SET estado = 'en_proceso', atendido_por = :atendido_por WHERE id = :id");
+            $stmtUp->execute(['atendido_por' => $adminId, 'id' => $id]);
             $selectedContact['estado'] = 'en_proceso';
+            $selectedContact['admin_nombre'] = $_SESSION['admin_user']['nombre'] ?? 'Administrador';
+            $selectedContact['admin_email'] = $_SESSION['admin_user']['email'] ?? '';
         } catch (Exception $e) {
             error_log("[Devioz Admin Contactos View Auto-Update Error] " . $e->getMessage());
         }
     }
 }
 
-// LISTA DE CONTACTOS
-$contacts = $pdo->query("SELECT * FROM contactos ORDER BY id DESC")->fetchAll();
+// LISTA DE CONTACTOS CON RELACIÓN A SERVICIOS Y USUARIOS
+$contacts = $pdo->query("
+    SELECT c.*, s.titulo AS servicio_oficial, u.nombre AS admin_nombre 
+    FROM contactos c 
+    LEFT JOIN servicios s ON c.servicio_id = s.id 
+    LEFT JOIN usuarios u ON c.atendido_por = u.id 
+    ORDER BY c.id DESC
+")->fetchAll();
 
 $pageTitle = 'Gestión de Solicitudes de Contacto';
 require_once __DIR__ . '/includes/header.php';
@@ -124,7 +144,24 @@ require_once __DIR__ . '/includes/header.php';
 
       <div>
         <strong style="color: var(--devioz-primary);">Servicio de Interés:</strong>
-        <p><?php echo htmlspecialchars($selectedContact['servicio_interes']); ?></p>
+        <p>
+          <?php echo htmlspecialchars($selectedContact['servicio_interes']); ?>
+          <?php if (!empty($selectedContact['servicio_oficial'])): ?>
+            <span class="badge badge-info" style="margin-left: 0.5rem; font-size: 0.75rem;">Servicio Oficial Vinculado</span>
+          <?php endif; ?>
+        </p>
+      </div>
+
+      <div>
+        <strong style="color: var(--devioz-primary);">Atendido / Gestionado por:</strong>
+        <p>
+          <?php if (!empty($selectedContact['admin_nombre'])): ?>
+            <span class="badge badge-success"><?php echo htmlspecialchars($selectedContact['admin_nombre']); ?></span>
+            <small style="color: var(--devioz-gray);"><?php echo htmlspecialchars($selectedContact['admin_email']); ?></small>
+          <?php else: ?>
+            <span style="color: var(--devioz-gray);">Sin asignar aún</span>
+          <?php endif; ?>
+        </p>
       </div>
 
       <div class="full">
@@ -174,6 +211,7 @@ require_once __DIR__ . '/includes/header.php';
           <th>Contacto</th>
           <th>Servicio Interés</th>
           <th>Estado</th>
+          <th>Atendido Por</th>
           <th>Fecha</th>
           <th>Acciones</th>
         </tr>
@@ -181,7 +219,7 @@ require_once __DIR__ . '/includes/header.php';
       <tbody>
         <?php if (empty($contacts)): ?>
           <tr>
-            <td colspan="6" style="text-align: center; color: var(--devioz-gray);">No hay solicitudes de contacto registradas.</td>
+            <td colspan="7" style="text-align: center; color: var(--devioz-gray);">No hay solicitudes de contacto registradas.</td>
           </tr>
         <?php else: ?>
           <?php foreach ($contacts as $c): ?>
@@ -194,7 +232,12 @@ require_once __DIR__ . '/includes/header.php';
                 <small><?php echo htmlspecialchars($c['email']); ?></small><br>
                 <small style="color: var(--devioz-gray);"><?php echo htmlspecialchars($c['telefono'] ?? ''); ?></small>
               </td>
-              <td><?php echo htmlspecialchars($c['servicio_interes']); ?></td>
+              <td>
+                <?php echo htmlspecialchars($c['servicio_interes']); ?>
+                <?php if (!empty($c['servicio_oficial'])): ?>
+                  <br><span class="badge badge-info" style="font-size: 0.7rem;">Vinculado</span>
+                <?php endif; ?>
+              </td>
               <td>
                 <?php if ($c['estado'] === 'nuevo'): ?>
                   <span class="badge badge-warning">Nuevo</span>
@@ -204,6 +247,13 @@ require_once __DIR__ . '/includes/header.php';
                   <span class="badge badge-success">Atendido</span>
                 <?php else: ?>
                   <span class="badge badge-secondary"><?php echo htmlspecialchars($c['estado']); ?></span>
+                <?php endif; ?>
+              </td>
+              <td>
+                <?php if (!empty($c['admin_nombre'])): ?>
+                  <small style="color: #e2e8f0; font-weight: 500;"><?php echo htmlspecialchars($c['admin_nombre']); ?></small>
+                <?php else: ?>
+                  <small style="color: var(--devioz-gray);">-</small>
                 <?php endif; ?>
               </td>
               <td><?php echo date('d/m/Y H:i', strtotime($c['creado_en'])); ?></td>

@@ -42,6 +42,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $beneficios = sanitizeText($_POST['beneficios'] ?? '');
             $estado = isset($_POST['estado']) ? 1 : 0;
 
+            $categoriaId = (!empty($_POST['categoria_id']) && (int)$_POST['categoria_id'] > 0) ? (int)$_POST['categoria_id'] : null;
+
             $validationError = '';
             if (empty($titulo) || empty($slug) || empty($descripcion)) {
                 $validationError = 'Título, Slug y Descripción son campos obligatorios.';
@@ -67,32 +69,34 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     if ($id > 0) {
                         $stmt = $pdo->prepare("
                             UPDATE servicios 
-                            SET titulo = :titulo, slug = :slug, descripcion = :descripcion, 
-                                imagen = :imagen, beneficios = :beneficios, estado = :estado 
+                            SET categoria_id = :categoria_id, titulo = :titulo, slug = :slug, 
+                                descripcion = :descripcion, imagen = :imagen, beneficios = :beneficios, estado = :estado 
                             WHERE id = :id
                         ");
                         $stmt->execute([
-                            'titulo'      => $titulo,
-                            'slug'        => $slug,
-                            'descripcion' => $descripcion,
-                            'imagen'      => $imagen,
-                            'beneficios'  => $beneficios,
-                            'estado'      => $estado,
-                            'id'          => $id
+                            'categoria_id' => $categoriaId,
+                            'titulo'       => $titulo,
+                            'slug'         => $slug,
+                            'descripcion'  => $descripcion,
+                            'imagen'       => $imagen,
+                            'beneficios'   => $beneficios,
+                            'estado'       => $estado,
+                            'id'           => $id
                         ]);
                         $_SESSION['flash_message'] = 'Servicio actualizado correctamente.';
                     } else {
                         $stmt = $pdo->prepare("
-                            INSERT INTO servicios (titulo, slug, descripcion, imagen, beneficios, estado) 
-                            VALUES (:titulo, :slug, :descripcion, :imagen, :beneficios, :estado)
+                            INSERT INTO servicios (categoria_id, titulo, slug, descripcion, imagen, beneficios, estado) 
+                            VALUES (:categoria_id, :titulo, :slug, :descripcion, :imagen, :beneficios, :estado)
                         ");
                         $stmt->execute([
-                            'titulo'      => $titulo,
-                            'slug'        => $slug,
-                            'descripcion' => $descripcion,
-                            'imagen'      => $imagen,
-                            'beneficios'  => $beneficios,
-                            'estado'      => $estado
+                            'categoria_id' => $categoriaId,
+                            'titulo'       => $titulo,
+                            'slug'         => $slug,
+                            'descripcion'  => $descripcion,
+                            'imagen'       => $imagen,
+                            'beneficios'   => $beneficios,
+                            'estado'       => $estado
                         ]);
                         $_SESSION['flash_message'] = 'Servicio creado correctamente.';
                     }
@@ -151,9 +155,16 @@ if ($formData) {
     $editService['estado'] = isset($formData['estado']) ? 1 : 0;
 }
 
-// OBTENER LISTA DE SERVICIOS
-$stmtList = $pdo->query("SELECT * FROM servicios ORDER BY id ASC");
+// OBTENER LISTA DE SERVICIOS Y CATEGORÍAS
+$stmtList = $pdo->query("
+    SELECT s.*, c.nombre AS categoria_nombre 
+    FROM servicios s 
+    LEFT JOIN categorias c ON s.categoria_id = c.id 
+    ORDER BY s.id ASC
+");
 $services = $stmtList->fetchAll();
+
+$categories = $pdo->query("SELECT id, nombre FROM categorias WHERE estado = 1 ORDER BY id ASC")->fetchAll();
 
 $pageTitle = 'Gestión de Servicios';
 require_once __DIR__ . '/includes/header.php';
@@ -202,9 +213,17 @@ require_once __DIR__ . '/includes/header.php';
           <small style="color: var(--devioz-gray); font-size: 0.8rem;">Solo letras minúsculas, números y guiones.</small>
         </div>
 
-        <div class="form-group-admin full">
-          <label for="descripcion">Descripción *</label>
-          <textarea id="descripcion" name="descripcion" class="form-control-admin" maxlength="5000" required><?php echo htmlspecialchars($editService['descripcion'] ?? ''); ?></textarea>
+        <div class="form-group-admin">
+          <label for="categoria_id">Categoría del Portafolio Vinculada</label>
+          <select id="categoria_id" name="categoria_id" class="form-control-admin">
+            <option value="">-- Sin categoría vinculada --</option>
+            <?php foreach ($categories as $cat): ?>
+              <option value="<?php echo $cat['id']; ?>" <?php echo (isset($editService['categoria_id']) && $editService['categoria_id'] == $cat['id']) ? 'selected' : ''; ?>>
+                <?php echo htmlspecialchars($cat['nombre']); ?>
+              </option>
+            <?php endforeach; ?>
+          </select>
+          <small style="color: var(--devioz-gray); font-size: 0.8rem;">Relación formal con las categorías de la base de datos.</small>
         </div>
 
         <div class="form-group-admin">
@@ -212,7 +231,12 @@ require_once __DIR__ . '/includes/header.php';
           <input type="text" id="imagen" name="imagen" class="form-control-admin" maxlength="255" value="<?php echo htmlspecialchars($editService['imagen'] ?? 'assets/img/services/diseno-grafico.svg'); ?>">
         </div>
 
-        <div class="form-group-admin">
+        <div class="form-group-admin full">
+          <label for="descripcion">Descripción *</label>
+          <textarea id="descripcion" name="descripcion" class="form-control-admin" maxlength="5000" required><?php echo htmlspecialchars($editService['descripcion'] ?? ''); ?></textarea>
+        </div>
+
+        <div class="form-group-admin full">
           <label for="beneficios">Beneficios (Separados por pipe |)</label>
           <input type="text" id="beneficios" name="beneficios" class="form-control-admin" maxlength="1000" placeholder="Beneficio 1|Beneficio 2|Beneficio 3" value="<?php echo htmlspecialchars($editService['beneficios'] ?? ''); ?>">
         </div>
@@ -238,6 +262,7 @@ require_once __DIR__ . '/includes/header.php';
       <thead>
         <tr>
           <th>Título</th>
+          <th>Categoría Vinculada</th>
           <th>Slug</th>
           <th>Beneficios</th>
           <th>Estado</th>
@@ -248,6 +273,13 @@ require_once __DIR__ . '/includes/header.php';
         <?php foreach ($services as $s): ?>
           <tr>
             <td><strong><?php echo htmlspecialchars($s['titulo']); ?></strong></td>
+            <td>
+              <?php if (!empty($s['categoria_nombre'])): ?>
+                <span class="badge badge-info"><?php echo htmlspecialchars($s['categoria_nombre']); ?></span>
+              <?php else: ?>
+                <span style="color: var(--devioz-gray);">-</span>
+              <?php endif; ?>
+            </td>
             <td><code><?php echo htmlspecialchars($s['slug']); ?></code></td>
             <td><small><?php echo htmlspecialchars($s['beneficios']); ?></small></td>
             <td>

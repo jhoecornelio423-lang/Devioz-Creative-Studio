@@ -50,6 +50,7 @@ CREATE TABLE `usuarios` (
 -- ----------------------------------------------------------------------------
 CREATE TABLE `servicios` (
   `id` INT AUTO_INCREMENT PRIMARY KEY,
+  `categoria_id` INT NULL,
   `titulo` VARCHAR(150) NOT NULL,
   `slug` VARCHAR(180) NOT NULL UNIQUE,
   `descripcion` TEXT NOT NULL,
@@ -57,12 +58,18 @@ CREATE TABLE `servicios` (
   `beneficios` TEXT NULL COMMENT 'Beneficios separados por pipe (|)',
   `estado` TINYINT DEFAULT 1 COMMENT '1: Activo, 0: Inactivo',
   `creado_en` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-  KEY `idx_servicios_estado` (`estado`)
+  KEY `idx_servicios_categoria` (`categoria_id`),
+  KEY `idx_servicios_estado` (`estado`),
+  CONSTRAINT `fk_servicios_categorias` 
+    FOREIGN KEY (`categoria_id`) 
+    REFERENCES `categorias` (`id`) 
+    ON DELETE SET NULL 
+    ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- ----------------------------------------------------------------------------
 -- 3. TABLA: categorias
--- Categorías principales del portafolio (Tabla padre para proyectos).
+-- Categorías principales del portafolio (Tabla padre para proyectos y servicios).
 -- ----------------------------------------------------------------------------
 CREATE TABLE `categorias` (
   `id` INT AUTO_INCREMENT PRIMARY KEY,
@@ -102,7 +109,7 @@ CREATE TABLE `proyectos` (
 
 -- ----------------------------------------------------------------------------
 -- 5. TABLA: contactos
--- Solicitudes de cotización y mensajes recibidos desde el formulario web.
+-- Solicitudes de cotización vinculadas al servicio de interés y usuario que atiende.
 -- ----------------------------------------------------------------------------
 CREATE TABLE `contactos` (
   `id` INT AUTO_INCREMENT PRIMARY KEY,
@@ -110,17 +117,31 @@ CREATE TABLE `contactos` (
   `empresa` VARCHAR(150) NULL,
   `email` VARCHAR(150) NOT NULL,
   `telefono` VARCHAR(40) NULL,
+  `servicio_id` INT NULL,
   `servicio_interes` VARCHAR(150) NOT NULL,
   `mensaje` TEXT NOT NULL,
   `estado` VARCHAR(50) DEFAULT 'nuevo' COMMENT 'nuevo, en_proceso, atendido, archivado',
+  `atendido_por` INT NULL,
   `creado_en` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  KEY `idx_contactos_servicio` (`servicio_id`),
+  KEY `idx_contactos_atendido_por` (`atendido_por`),
   KEY `idx_contactos_estado` (`estado`),
-  KEY `idx_contactos_creado_en` (`creado_en`)
+  KEY `idx_contactos_creado_en` (`creado_en`),
+  CONSTRAINT `fk_contactos_servicios` 
+    FOREIGN KEY (`servicio_id`) 
+    REFERENCES `servicios` (`id`) 
+    ON DELETE SET NULL 
+    ON UPDATE CASCADE,
+  CONSTRAINT `fk_contactos_usuarios` 
+    FOREIGN KEY (`atendido_por`) 
+    REFERENCES `usuarios` (`id`) 
+    ON DELETE SET NULL 
+    ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- ----------------------------------------------------------------------------
 -- 6. TABLA: configuracion
--- Parámetros generales del proyecto (email, redes, sede, etc.).
+-- Parámetros generales editables del proyecto (email, teléfono, sede, etc.).
 -- ----------------------------------------------------------------------------
 CREATE TABLE `configuracion` (
   `id` INT AUTO_INCREMENT PRIMARY KEY,
@@ -145,13 +166,13 @@ INSERT INTO `categorias` (`id`, `nombre`, `slug`, `estado`) VALUES
 (4, 'Fotografía', 'fotografia', 1),
 (5, 'Branding', 'branding', 1);
 
--- 3. Insertar Servicios Principales
-INSERT INTO `servicios` (`id`, `titulo`, `slug`, `descripcion`, `imagen`, `beneficios`, `estado`) VALUES
-(1, 'Diseño gráfico profesional', 'diseno-grafico-profesional', 'Piezas visuales para redes, campañas, presentaciones, identidad corporativa y comunicación comercial.', 'assets/img/services/diseno-grafico.svg', 'Branding e Identidad Corporativa|Piezas para Redes & Campañas|Presentaciones de Alto Impacto', 1),
-(2, 'Producción de videos', 'produccion-de-videos', 'Creamos videos institucionales, promocionales y contenido dinámico para redes sociales.', 'assets/img/services/produccion-videos.svg', 'Videos Institucionales|Contenido Dinámico para RRSS|Edición y Postproducción 4K', 1),
-(3, 'Spots publicitarios', 'spots-publicitarios', 'Anuncios cortos y directos para comunicar promociones, lanzamientos y mensajes clave de marca.', 'assets/img/services/spots-publicitarios.svg', 'Spots para Ads (Meta, YouTube, TikTok)|Guionismo & Concepto Creativo|Locución y Audio Profesional', 1),
-(4, 'Fotografía profesional', 'fotografia-profesional', 'Fotografía corporativa, de productos, eventos y contenido comercial con acabado profesional.', 'assets/img/services/fotografia-profesional.svg', 'Fotografía Corporativa y Equipo|Fotografía de Producto & E-commerce|Cobertura de Eventos Empresariales', 1),
-(5, 'Contenido visual especializado', 'contenido-visual-especializado', 'Soluciones gráficas y audiovisuales pensadas para campañas digitales, branding y comunicación de alto impacto.', 'assets/img/services/contenido-especializado.svg', 'Animaciones 2D / Motion Graphics|Kits Visuales para Lanzamientos|Estrategia Visual de Marca', 1);
+-- 3. Insertar Servicios Principales (Vinculados a su categoría correspondiente)
+INSERT INTO `servicios` (`id`, `categoria_id`, `titulo`, `slug`, `descripcion`, `imagen`, `beneficios`, `estado`) VALUES
+(1, 1, 'Diseño gráfico profesional', 'diseno-grafico-profesional', 'Piezas visuales para redes, campañas, presentaciones, identidad corporativa y comunicación comercial.', 'assets/img/services/diseno-grafico.svg', 'Branding e Identidad Corporativa|Piezas para Redes & Campañas|Presentaciones de Alto Impacto', 1),
+(2, 2, 'Producción de videos', 'produccion-de-videos', 'Creamos videos institucionales, promocionales y contenido dinámico para redes sociales.', 'assets/img/services/produccion-videos.svg', 'Videos Institucionales|Contenido Dinámico para RRSS|Edición y Postproducción 4K', 1),
+(3, 3, 'Spots publicitarios', 'spots-publicitarios', 'Anuncios cortos y directos para comunicar promociones, lanzamientos y mensajes clave de marca.', 'assets/img/services/spots-publicitarios.svg', 'Spots para Ads (Meta, YouTube, TikTok)|Guionismo & Concepto Creativo|Locución y Audio Profesional', 1),
+(4, 4, 'Fotografía profesional', 'fotografia-profesional', 'Fotografía corporativa, de productos, eventos y contenido comercial con acabado profesional.', 'assets/img/services/fotografia-profesional.svg', 'Fotografía Corporativa y Equipo|Fotografía de Producto & E-commerce|Cobertura de Eventos Empresariales', 1),
+(5, 5, 'Contenido visual especializado', 'contenido-visual-especializado', 'Soluciones gráficas y audiovisuales pensadas para campañas digitales, branding y comunicación de alto impacto.', 'assets/img/services/contenido-especializado.svg', 'Animaciones 2D / Motion Graphics|Kits Visuales para Lanzamientos|Estrategia Visual de Marca', 1);
 
 -- 4. Insertar 6 Proyectos Simulados del Portafolio
 INSERT INTO `proyectos` (`categoria_id`, `titulo`, `slug`, `descripcion`, `imagen`, `tipo`, `cliente`, `fecha`, `destacado`, `estado`) VALUES
@@ -168,4 +189,5 @@ INSERT INTO `configuracion` (`clave`, `valor`) VALUES
 ('email_contacto', 'contacto@devioz.com'),
 ('web_oficial', 'https://devioz.com/'),
 ('sede_principal', 'Lima, Perú'),
-('telefono_contacto', '+51 999 999 999');
+('telefono_contacto', '999 999 999'),
+('horario_atencion', 'Lun - Vie: 9:00 AM - 6:00 PM');

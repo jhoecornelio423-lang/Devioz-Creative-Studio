@@ -77,9 +77,24 @@ if (!empty($errors)) {
 try {
     $pdo = getPDOConnection();
     
+    // Buscar si el servicio seleccionado corresponde a un registro formal en la tabla servicios
+    $servicioId = null;
+    $stmtSrv = $pdo->prepare("SELECT id, titulo FROM servicios WHERE slug = :slug OR titulo = :titulo LIMIT 1");
+    $stmtSrv->execute([
+        'slug'   => $servicioInteres,
+        'titulo' => $servicioInteres
+    ]);
+    $foundService = $stmtSrv->fetch();
+    if ($foundService) {
+        $servicioId = (int)$foundService['id'];
+        $servicioInteres = $foundService['titulo'];
+    } elseif ($servicioInteres === 'otro') {
+        $servicioInteres = 'Otro requerimiento';
+    }
+
     $stmt = $pdo->prepare("
-        INSERT INTO contactos (nombre, empresa, email, telefono, servicio_interes, mensaje, estado)
-        VALUES (:nombre, :empresa, :email, :telefono, :servicio_interes, :mensaje, 'nuevo')
+        INSERT INTO contactos (nombre, empresa, email, telefono, servicio_id, servicio_interes, mensaje, estado)
+        VALUES (:nombre, :empresa, :email, :telefono, :servicio_id, :servicio_interes, :mensaje, 'nuevo')
     ");
 
     $stmt->execute([
@@ -87,6 +102,7 @@ try {
         'empresa'          => $empresa,
         'email'            => $email,
         'telefono'         => $telefono,
+        'servicio_id'      => $servicioId,
         'servicio_interes' => $servicioInteres,
         'mensaje'          => $mensaje
     ]);
@@ -94,7 +110,8 @@ try {
     $insertedId = $pdo->lastInsertId();
 
     successResponse([
-        'id' => (int)$insertedId
+        'id'          => (int)$insertedId,
+        'servicio_id' => $servicioId
     ], 'Solicitud registrada correctamente', 201);
 
 } catch (Exception $e) {

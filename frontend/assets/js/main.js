@@ -10,6 +10,7 @@ document.addEventListener('DOMContentLoaded', () => {
   initMobileMenu();
   loadPortfolio();
   loadServices();
+  loadConfig();
   initContactForm();
   initScrollspy();
   initRealtimeSync();
@@ -28,6 +29,7 @@ function escapeHtml(text) {
 // Variables para hash de control de sincronización
 let prevPortfolioHash = '';
 let prevServicesHash = '';
+let prevConfigHash = '';
 let clientSyncChannel = null;
 try {
   if ('BroadcastChannel' in window) {
@@ -315,6 +317,69 @@ async function loadServices() {
 }
 
 /**
+ * Dynamic Configuration Loading from Backend API (Con soporte de tiempo real sin F5)
+ */
+async function loadConfig() {
+  try {
+    const ts = Date.now();
+    const res = await fetch(`../backend/api/config.php?_t=${ts}`, { cache: 'no-store' });
+    if (!res.ok) return;
+
+    const result = await res.json();
+    if (!result || !result.success || !result.data) {
+      return;
+    }
+
+    const config = result.data;
+    const currentHash = JSON.stringify(config);
+    if (currentHash === prevConfigHash) {
+      return;
+    }
+    prevConfigHash = currentHash;
+
+    // Sincronizar dinámicamente datos de contacto en el pie de página
+    const footerEmail = document.getElementById('footer-email');
+    if (footerEmail && config.email_contacto) {
+      footerEmail.textContent = config.email_contacto;
+      footerEmail.setAttribute('href', `mailto:${config.email_contacto}`);
+    }
+
+    const footerTelefono = document.getElementById('footer-telefono');
+    if (footerTelefono && config.telefono_contacto) {
+      footerTelefono.textContent = config.telefono_contacto;
+    }
+
+    const footerSede = document.getElementById('footer-sede');
+    if (footerSede && config.sede_principal) {
+      footerSede.textContent = config.sede_principal;
+    }
+
+    const footerWeb = document.getElementById('footer-web');
+    if (footerWeb && config.web_oficial) {
+      footerWeb.textContent = config.web_oficial.replace(/^https?:\/\//, '').replace(/\/+$/, '');
+      footerWeb.setAttribute('href', config.web_oficial);
+    }
+
+    const footerExternal = document.getElementById('footer-external-link');
+    if (footerExternal && config.web_oficial) {
+      footerExternal.setAttribute('href', config.web_oficial);
+    }
+
+    const footerHorario = document.getElementById('footer-horario');
+    const footerHorarioRow = document.getElementById('footer-horario-row');
+    if (footerHorario && config.horario_atencion) {
+      footerHorario.textContent = config.horario_atencion;
+      if (footerHorarioRow) {
+        footerHorarioRow.style.display = '';
+      }
+    }
+
+  } catch (err) {
+    console.warn('[Devioz] Fallback en config:', err);
+  }
+}
+
+/**
  * 6. Sincronización en Tiempo Real sin F5 (Zero-Reload Live Sync)
  * - BroadcastChannel para comunicación instantánea (1ms) entre pestañas
  * - Storage Event como respaldo inter-ventanas
@@ -322,39 +387,40 @@ async function loadServices() {
  * - Sondeo inteligente en segundo plano cada 2 segundos
  */
 function initRealtimeSync() {
+  const syncAllData = () => {
+    loadPortfolio();
+    loadServices();
+    loadConfig();
+  };
+
   if (clientSyncChannel) {
     clientSyncChannel.onmessage = (e) => {
       if (!e.data || e.data.action === 'SYNC' || !e.data.action) {
-        loadPortfolio();
-        loadServices();
+        syncAllData();
       }
     };
   }
 
   window.addEventListener('storage', (e) => {
     if (e.key === 'devioz_sync_trigger') {
-      loadPortfolio();
-      loadServices();
+      syncAllData();
     }
   });
 
   document.addEventListener('visibilitychange', () => {
     if (document.visibilityState === 'visible') {
-      loadPortfolio();
-      loadServices();
+      syncAllData();
     }
   });
 
   window.addEventListener('focus', () => {
-    loadPortfolio();
-    loadServices();
+    syncAllData();
   });
 
   // Sondeo inteligente cada 2 segundos cuando la pestaña está en pantalla
   setInterval(() => {
     if (!document.hidden) {
-      loadPortfolio();
-      loadServices();
+      syncAllData();
     }
   }, 2000);
 }

@@ -99,7 +99,7 @@ function initAdminRealtimeListener() {
     const rawPath = window.location.pathname.replace(/\/+$/, '');
     const isContactList = rawPath.endsWith('contactos.php') && !window.location.search.includes('action=view');
     const isDashboard = rawPath.endsWith('dashboard.php') || rawPath.endsWith('admin') || rawPath.endsWith('admin/index.php');
-    const isModuleList = rawPath.endsWith('proyectos.php') || rawPath.endsWith('servicios.php') || rawPath.endsWith('categorias.php');
+    const isModuleList = rawPath.endsWith('proyectos.php') || rawPath.endsWith('servicios.php') || rawPath.endsWith('categorias.php') || rawPath.endsWith('configuracion.php');
 
     if (action === 'NEW_CONTACT' && (isContactList || isDashboard)) {
       // Actualizar silenciosamente la tabla y contadores sin forzar F5

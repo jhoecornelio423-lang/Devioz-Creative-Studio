@@ -38,6 +38,11 @@ $currentPage = basename($_SERVER['PHP_SELF']);
         ✉️ Contactos
       </a>
     </li>
+    <li>
+      <a href="configuracion.php" class="<?php echo $currentPage === 'configuracion.php' ? 'active' : ''; ?>">
+        ⚙️ Configuración
+      </a>
+    </li>
     <li style="margin-top: 1.5rem; border-top: 1px solid var(--devioz-border); padding-top: 1rem;">
       <a href="../frontend/index.html" target="_blank">
         🌐 Ver Web Pública &rarr;
