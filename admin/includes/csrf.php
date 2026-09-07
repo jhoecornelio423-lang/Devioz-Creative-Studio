@@ -35,6 +35,16 @@ if (!function_exists('csrfField')) {
     }
 }
 
+if (!function_exists('getCsrfField')) {
+    /**
+     * Alias de retorno de cadena para csrfField(false).
+     * @return string
+     */
+    function getCsrfField() {
+        return csrfField(false);
+    }
+}
+
 if (!function_exists('validateCsrfToken')) {
     /**
      * Valida si el token CSRF recibido por POST coincide con el de la sesión.

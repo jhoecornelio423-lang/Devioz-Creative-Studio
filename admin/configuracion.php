@@ -138,7 +138,7 @@ require_once __DIR__ . '/includes/header.php';
 
 <div class="admin-card">
   <form action="configuracion.php" method="POST">
-    <?php echo getCsrfField(); ?>
+    <?php csrfField(); ?>
 
     <div class="form-grid">
       <!-- Nombre del Proyecto -->
