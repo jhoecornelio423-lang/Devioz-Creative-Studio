@@ -11,13 +11,31 @@ try {
 } catch (e) {}
 
 document.addEventListener('DOMContentLoaded', () => {
-  // Auto-generación de slug a partir del título o nombre
+  // Auto-generación y previsualización dinámica de slug (sin requerir intervención manual)
   const titleInput = document.getElementById('titulo') || document.getElementById('nombre');
   const slugInput = document.getElementById('slug');
+  const slugPreview = document.getElementById('slug-preview');
 
-  if (titleInput && slugInput && !slugInput.value) {
+  if (titleInput && slugInput) {
     titleInput.addEventListener('input', () => {
-      slugInput.value = generateSlug(titleInput.value);
+      const generated = generateSlug(titleInput.value);
+      slugInput.value = generated;
+      if (slugPreview) {
+        slugPreview.textContent = generated || 'generado-al-escribir';
+      }
+    });
+  }
+
+  // Previsualización instantánea de imagen al seleccionar archivo desde el equipo
+  const fileInput = document.getElementById('imagen_archivo');
+  const imgPreview = document.getElementById('image-preview');
+  if (fileInput && imgPreview) {
+    fileInput.addEventListener('change', () => {
+      const file = fileInput.files && fileInput.files[0];
+      if (file) {
+        imgPreview.src = URL.createObjectURL(file);
+        imgPreview.style.display = 'block';
+      }
     });
   }
 

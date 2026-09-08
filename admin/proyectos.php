@@ -7,6 +7,7 @@ require_once __DIR__ . '/includes/auth.php';
 require_once __DIR__ . '/includes/csrf.php';
 require_once __DIR__ . '/../backend/config/database.php';
 require_once __DIR__ . '/../backend/helpers/validation.php';
+require_once __DIR__ . '/includes/upload.php';
 
 $pdo = getPDOConnection();
 
@@ -25,7 +26,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         if ($postAction === 'toggle' && $id > 0) {
             $stmt = $pdo->prepare("UPDATE proyectos SET estado = IF(estado=1, 0, 1) WHERE id = :id");
             $stmt->execute(['id' => $id]);
-            $_SESSION['flash_message'] = "El estado del proyecto #{$id} fue actualizado correctamente.";
+            $_SESSION['flash_message'] = "El estado del proyecto #{$id} fue modificado.";
             header("Location: proyectos.php");
             exit;
         } elseif ($postAction === 'toggle_featured' && $id > 0) {
@@ -45,85 +46,88 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $titulo = sanitizeText($_POST['titulo'] ?? '');
             $slug = sanitizeText($_POST['slug'] ?? '');
             $descripcion = sanitizeText($_POST['descripcion'] ?? '');
-            $imagen = sanitizeText($_POST['imagen'] ?? '');
             $tipo = sanitizeText($_POST['tipo'] ?? '');
             $cliente = sanitizeText($_POST['cliente'] ?? '');
             $fecha = !empty($_POST['fecha']) ? trim($_POST['fecha']) : null;
             $destacado = isset($_POST['destacado']) ? 1 : 0;
             $estado = isset($_POST['estado']) ? 1 : 0;
 
+            // Procesar subida de archivo de imagen con fallback a la existente
+            $imagenActual = sanitizeText($_POST['imagen_actual'] ?? 'assets/img/portfolio/project-1.svg');
+            $uploadResult = handleImageUpload('imagen_archivo', 'proj', $imagenActual);
+
             $validationError = '';
-            if (empty($titulo) || empty($slug) || $categoriaId <= 0 || empty($descripcion)) {
-                $validationError = 'Título, Slug, Categoría y Descripción son obligatorios.';
+            if (!$uploadResult['success']) {
+                $validationError = $uploadResult['error'];
+            } elseif (empty($titulo) || $categoriaId <= 0 || empty($descripcion)) {
+                $validationError = 'El título, la categoría y la descripción del proyecto son obligatorios.';
             } elseif (!validateMaxLength($titulo, 150)) {
                 $validationError = 'El título no puede superar los 150 caracteres.';
-            } elseif (!isValidSlug($slug, 180)) {
-                $validationError = 'El slug URL no es válido. Solo debe contener letras minúsculas, números y guiones sencillos (máx 180 caracteres).';
             } elseif (!categoryExists($pdo, $categoriaId)) {
                 $validationError = 'La categoría seleccionada no existe en el sistema. Por favor, selecciona una categoría válida.';
             } elseif (!validateMaxLength($descripcion, 5000)) {
                 $validationError = 'La descripción no puede superar los 5000 caracteres.';
-            } elseif (!empty($imagen) && !validateMaxLength($imagen, 255)) {
-                $validationError = 'La ruta de imagen no puede superar los 255 caracteres.';
             } elseif (!empty($tipo) && !validateMaxLength($tipo, 80)) {
                 $validationError = 'El tipo de entregable no puede superar los 80 caracteres.';
             } elseif (!empty($cliente) && !validateMaxLength($cliente, 120)) {
                 $validationError = 'El nombre del cliente no puede superar los 120 caracteres.';
             } elseif (!empty($fecha) && !isValidDate($fecha, 'Y-m-d')) {
-                $validationError = 'La fecha ingresada no tiene un formato válido (debe ser AAAA-MM-DD) o no es una fecha real.';
+                $validationError = 'La fecha ingresada no tiene un formato válido (debe ser AAAA-MM-DD).';
             } elseif (!isValidStatus($destacado, [0, 1]) || !isValidStatus($estado, [0, 1])) {
                 $validationError = 'Los valores de estado o destacado no son válidos.';
             } else {
-                $stmtCheck = $pdo->prepare("SELECT id FROM proyectos WHERE slug = :slug AND id != :id LIMIT 1");
-                $stmtCheck->execute(['slug' => $slug, 'id' => $id]);
+                $imagen = $uploadResult['path'];
 
-                if ($stmtCheck->fetch()) {
-                    $validationError = "El slug '{$slug}' ya está en uso por otro proyecto. Por favor, elige uno diferente.";
+                // Generación y garantía de unicidad automática del Slug (sin pedirle al admin que lo invente)
+                if (empty($slug)) {
+                    $slug = generateUniqueSlug($pdo, 'proyectos', $titulo, $id);
                 } else {
-                    if ($id > 0) {
-                        $stmt = $pdo->prepare("
-                            UPDATE proyectos 
-                            SET categoria_id = :cat_id, titulo = :titulo, slug = :slug, 
-                                descripcion = :descripcion, imagen = :imagen, tipo = :tipo, 
-                                cliente = :cliente, fecha = :fecha, destacado = :destacado, estado = :estado
-                            WHERE id = :id
-                        ");
-                        $stmt->execute([
-                            'cat_id'      => $categoriaId,
-                            'titulo'      => $titulo,
-                            'slug'        => $slug,
-                            'descripcion' => $descripcion,
-                            'imagen'      => $imagen,
-                            'tipo'        => $tipo,
-                            'cliente'     => $cliente,
-                            'fecha'       => $fecha,
-                            'destacado'   => $destacado,
-                            'estado'      => $estado,
-                            'id'          => $id
-                        ]);
-                        $_SESSION['flash_message'] = 'Proyecto actualizado correctamente.';
-                    } else {
-                        $stmt = $pdo->prepare("
-                            INSERT INTO proyectos (categoria_id, titulo, slug, descripcion, imagen, tipo, cliente, fecha, destacado, estado)
-                            VALUES (:cat_id, :titulo, :slug, :descripcion, :imagen, :tipo, :cliente, :fecha, :destacado, :estado)
-                        ");
-                        $stmt->execute([
-                            'cat_id'      => $categoriaId,
-                            'titulo'      => $titulo,
-                            'slug'        => $slug,
-                            'descripcion' => $descripcion,
-                            'imagen'      => $imagen,
-                            'tipo'        => $tipo,
-                            'cliente'     => $cliente,
-                            'fecha'       => $fecha,
-                            'destacado'   => $destacado,
-                            'estado'      => $estado
-                        ]);
-                        $_SESSION['flash_message'] = 'Proyecto creado correctamente.';
-                    }
-                    header("Location: proyectos.php");
-                    exit;
+                    $slug = generateUniqueSlug($pdo, 'proyectos', $slug, $id);
                 }
+
+                if ($id > 0) {
+                    $stmt = $pdo->prepare("
+                        UPDATE proyectos 
+                        SET categoria_id = :cat_id, titulo = :titulo, slug = :slug, 
+                            descripcion = :descripcion, imagen = :imagen, tipo = :tipo, 
+                            cliente = :cliente, fecha = :fecha, destacado = :destacado, estado = :estado
+                        WHERE id = :id
+                    ");
+                    $stmt->execute([
+                        'cat_id'      => $categoriaId,
+                        'titulo'      => $titulo,
+                        'slug'        => $slug,
+                        'descripcion' => $descripcion,
+                        'imagen'      => $imagen,
+                        'tipo'        => $tipo,
+                        'cliente'     => $cliente,
+                        'fecha'       => $fecha,
+                        'destacado'   => $destacado,
+                        'estado'      => $estado,
+                        'id'          => $id
+                    ]);
+                    $_SESSION['flash_message'] = 'Proyecto actualizado correctamente.';
+                } else {
+                    $stmt = $pdo->prepare("
+                        INSERT INTO proyectos (categoria_id, titulo, slug, descripcion, imagen, tipo, cliente, fecha, destacado, estado)
+                        VALUES (:cat_id, :titulo, :slug, :descripcion, :imagen, :tipo, :cliente, :fecha, :destacado, :estado)
+                    ");
+                    $stmt->execute([
+                        'cat_id'      => $categoriaId,
+                        'titulo'      => $titulo,
+                        'slug'        => $slug,
+                        'descripcion' => $descripcion,
+                        'imagen'      => $imagen,
+                        'tipo'        => $tipo,
+                        'cliente'     => $cliente,
+                        'fecha'       => $fecha,
+                        'destacado'   => $destacado,
+                        'estado'      => $estado
+                    ]);
+                    $_SESSION['flash_message'] = 'Proyecto creado correctamente.';
+                }
+                header("Location: proyectos.php");
+                exit;
             }
 
             if (!empty($validationError)) {
@@ -219,7 +223,7 @@ require_once __DIR__ . '/includes/header.php';
       <?php echo $editProject ? 'Editar Proyecto #' . $editProject['id'] : 'Crear Nuevo Proyecto'; ?>
     </h2>
 
-    <form method="POST" action="proyectos.php">
+    <form method="POST" action="proyectos.php" enctype="multipart/form-data">
       <?php csrfField(); ?>
       <input type="hidden" name="action" value="save">
       <?php if ($editProject): ?>
@@ -227,15 +231,18 @@ require_once __DIR__ . '/includes/header.php';
       <?php endif; ?>
 
       <div class="form-grid">
-        <div class="form-group-admin">
+        <div class="form-group-admin full">
           <label for="titulo">Título del Proyecto *</label>
-          <input type="text" id="titulo" name="titulo" class="form-control-admin" maxlength="150" required value="<?php echo htmlspecialchars($editProject['titulo'] ?? ''); ?>">
-        </div>
-
-        <div class="form-group-admin">
-          <label for="slug">Slug URL *</label>
-          <input type="text" id="slug" name="slug" class="form-control-admin" maxlength="180" placeholder="ej-campana-redes" required value="<?php echo htmlspecialchars($editProject['slug'] ?? ''); ?>">
-          <small style="color: var(--devioz-gray); font-size: 0.8rem;">Solo letras minúsculas, números y guiones.</small>
+          <input type="text" id="titulo" name="titulo" class="form-control-admin" maxlength="150" required 
+                 placeholder="Ej. Campaña Visual para Redes Sociales" 
+                 value="<?php echo htmlspecialchars($editProject['titulo'] ?? ''); ?>">
+          <input type="hidden" id="slug" name="slug" value="<?php echo htmlspecialchars($editProject['slug'] ?? ''); ?>">
+          <small style="color: var(--devioz-gray); font-size: 0.82rem; margin-top: 0.35rem; display: flex; align-items: center; gap: 0.4rem;">
+            <span>🔗 Enlace web permanente (automático):</span>
+            <span id="slug-preview" style="color: var(--devioz-primary); font-family: monospace; font-size: 0.85rem;">
+              <?php echo htmlspecialchars($editProject['slug'] ?? 'generado-al-escribir'); ?>
+            </span>
+          </small>
         </div>
 
         <div class="form-group-admin">
@@ -252,7 +259,7 @@ require_once __DIR__ . '/includes/header.php';
 
         <div class="form-group-admin">
           <label for="tipo">Tipo de Entregable</label>
-          <input type="text" id="tipo" name="tipo" class="form-control-admin" maxlength="80" placeholder="Ej. Diseño Gráfico, Spot" value="<?php echo htmlspecialchars($editProject['tipo'] ?? ''); ?>">
+          <input type="text" id="tipo" name="tipo" class="form-control-admin" maxlength="80" placeholder="Ej. Diseño Gráfico, Spot, Video" value="<?php echo htmlspecialchars($editProject['tipo'] ?? ''); ?>">
         </div>
 
         <div class="form-group-admin">
@@ -266,13 +273,28 @@ require_once __DIR__ . '/includes/header.php';
         </div>
 
         <div class="form-group-admin full">
-          <label for="imagen">Ruta Imagen SVG / Asset</label>
-          <input type="text" id="imagen" name="imagen" class="form-control-admin" maxlength="255" value="<?php echo htmlspecialchars($editProject['imagen'] ?? 'assets/img/portfolio/project-1.svg'); ?>">
+          <label for="imagen_archivo">Fotografía o Imagen del Proyecto</label>
+          <div style="display: flex; gap: 1.25rem; align-items: center; background: rgba(0,0,0,0.25); border: 1px dashed var(--devioz-border); border-radius: 8px; padding: 1rem; flex-wrap: wrap;">
+            <?php 
+              $currentImg = $editProject['imagen'] ?? 'assets/img/portfolio/project-1.svg';
+              $previewSrc = '../frontend/' . ltrim($currentImg, '/');
+            ?>
+            <div id="image-preview-box" style="width: 120px; height: 80px; border-radius: 6px; overflow: hidden; background: #001a1a; display: flex; align-items: center; justify-content: center; border: 1px solid var(--devioz-border); flex-shrink: 0;">
+              <img id="image-preview" src="<?php echo htmlspecialchars($previewSrc); ?>" alt="Vista previa" style="width: 100%; height: 100%; object-fit: cover;" onerror="this.src='../frontend/assets/img/portfolio/project-1.svg'">
+            </div>
+            <div style="flex-grow: 1; min-width: 240px;">
+              <input type="file" id="imagen_archivo" name="imagen_archivo" accept="image/*" class="form-control-admin" style="padding: 0.5rem; background: var(--devioz-dark);">
+              <input type="hidden" name="imagen_actual" value="<?php echo htmlspecialchars($currentImg); ?>">
+              <small style="color: var(--devioz-gray); font-size: 0.8rem; display: block; margin-top: 0.35rem;">
+                Selecciona una imagen desde tu equipo (JPG, PNG, WEBP, SVG). Si no seleccionas una nueva, se conservará la imagen actual.
+              </small>
+            </div>
+          </div>
         </div>
 
         <div class="form-group-admin full">
           <label for="descripcion">Descripción del Proyecto *</label>
-          <textarea id="descripcion" name="descripcion" class="form-control-admin" maxlength="5000" required><?php echo htmlspecialchars($editProject['descripcion'] ?? ''); ?></textarea>
+          <textarea id="descripcion" name="descripcion" class="form-control-admin" maxlength="5000" required rows="4" placeholder="Describe brevemente el alcance y objetivos del proyecto..."><?php echo htmlspecialchars($editProject['descripcion'] ?? ''); ?></textarea>
         </div>
 
         <div class="form-group-admin">
@@ -302,6 +324,7 @@ require_once __DIR__ . '/includes/header.php';
     <table class="admin-table">
       <thead>
         <tr>
+          <th>Vista</th>
           <th>Título</th>
           <th>Categoría</th>
           <th>Cliente</th>
@@ -313,7 +336,10 @@ require_once __DIR__ . '/includes/header.php';
       <tbody>
         <?php foreach ($projects as $p): ?>
           <tr>
-            <td><strong><?php echo htmlspecialchars($p['titulo']); ?></strong><br><small style="color: var(--devioz-gray);"><?php echo htmlspecialchars($p['slug']); ?></small></td>
+            <td style="width: 60px;">
+              <img src="../frontend/<?php echo htmlspecialchars($p['imagen']); ?>" alt="Img" style="width: 48px; height: 34px; object-fit: cover; border-radius: 4px; border: 1px solid var(--devioz-border); display: block;" onerror="this.src='../frontend/assets/img/portfolio/project-1.svg'">
+            </td>
+            <td><strong><?php echo htmlspecialchars($p['titulo']); ?></strong><br><small style="color: var(--devioz-gray); font-family: monospace;"><?php echo htmlspecialchars($p['slug']); ?></small></td>
             <td>
               <span class="badge badge-info"><?php echo htmlspecialchars($p['categoria_nombre']); ?></span>
               <?php if (isset($p['categoria_estado']) && $p['categoria_estado'] == 0): ?>

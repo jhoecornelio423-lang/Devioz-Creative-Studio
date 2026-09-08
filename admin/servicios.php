@@ -7,6 +7,7 @@ require_once __DIR__ . '/includes/auth.php';
 require_once __DIR__ . '/includes/csrf.php';
 require_once __DIR__ . '/../backend/config/database.php';
 require_once __DIR__ . '/../backend/helpers/validation.php';
+require_once __DIR__ . '/includes/upload.php';
 
 $pdo = getPDOConnection();
 
@@ -25,7 +26,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         if ($postAction === 'toggle' && $id > 0) {
             $stmt = $pdo->prepare("UPDATE servicios SET estado = IF(estado=1, 0, 1) WHERE id = :id");
             $stmt->execute(['id' => $id]);
-            $_SESSION['flash_message'] = "El estado del servicio #{$id} fue actualizado correctamente.";
+            $_SESSION['flash_message'] = "El estado del servicio #{$id} fue modificado.";
             header("Location: servicios.php");
             exit;
         } elseif ($postAction === 'delete' && $id > 0) {
@@ -38,71 +39,87 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $titulo = sanitizeText($_POST['titulo'] ?? '');
             $slug = sanitizeText($_POST['slug'] ?? '');
             $descripcion = sanitizeText($_POST['descripcion'] ?? '');
-            $imagen = sanitizeText($_POST['imagen'] ?? '');
-            $beneficios = sanitizeText($_POST['beneficios'] ?? '');
             $estado = isset($_POST['estado']) ? 1 : 0;
-
             $categoriaId = (!empty($_POST['categoria_id']) && (int)$_POST['categoria_id'] > 0) ? (int)$_POST['categoria_id'] : null;
 
+            // Procesar beneficios ingresados línea por línea de forma amigable
+            $rawBeneficios = trim($_POST['beneficios'] ?? '');
+            $beneficios = '';
+            if (!empty($rawBeneficios)) {
+                $lines = preg_split('/[\r\n\|]+/', $rawBeneficios);
+                $cleanLines = [];
+                foreach ($lines as $line) {
+                    $trimmed = trim(sanitizeText($line));
+                    if (!empty($trimmed)) {
+                        $cleanLines[] = $trimmed;
+                    }
+                }
+                $beneficios = implode('|', $cleanLines);
+            }
+
+            // Procesar subida de archivo de imagen con fallback
+            $imagenActual = sanitizeText($_POST['imagen_actual'] ?? 'assets/img/services/diseno-grafico.svg');
+            $uploadResult = handleImageUpload('imagen_archivo', 'serv', $imagenActual);
+
             $validationError = '';
-            if (empty($titulo) || empty($slug) || empty($descripcion)) {
-                $validationError = 'Título, Slug y Descripción son campos obligatorios.';
+            if (!$uploadResult['success']) {
+                $validationError = $uploadResult['error'];
+            } elseif (empty($titulo) || empty($descripcion)) {
+                $validationError = 'El título y la descripción del servicio son obligatorios.';
             } elseif (!validateMaxLength($titulo, 150)) {
                 $validationError = 'El título no puede superar los 150 caracteres.';
-            } elseif (!isValidSlug($slug, 180)) {
-                $validationError = 'El slug URL no es válido. Solo debe contener letras minúsculas, números y guiones sencillos (máx 180 caracteres).';
             } elseif (!validateMaxLength($descripcion, 5000)) {
                 $validationError = 'La descripción es demasiado larga (máximo 5000 caracteres).';
-            } elseif (!empty($imagen) && !validateMaxLength($imagen, 255)) {
-                $validationError = 'La ruta de imagen no puede superar los 255 caracteres.';
             } elseif (!empty($beneficios) && !validateMaxLength($beneficios, 1000)) {
-                $validationError = 'Los beneficios no pueden superar los 1000 caracteres.';
+                $validationError = 'Los beneficios no pueden superar los 1000 caracteres en total.';
             } elseif (!isValidStatus($estado, [0, 1])) {
                 $validationError = 'El estado proporcionado no es válido.';
             } else {
-                $stmtCheck = $pdo->prepare("SELECT id FROM servicios WHERE slug = :slug AND id != :id LIMIT 1");
-                $stmtCheck->execute(['slug' => $slug, 'id' => $id]);
+                $imagen = $uploadResult['path'];
 
-                if ($stmtCheck->fetch()) {
-                    $validationError = "El slug '{$slug}' ya está registrado en otro servicio. Por favor, elige uno diferente.";
+                // Generación y garantía de unicidad automática del Slug
+                if (empty($slug)) {
+                    $slug = generateUniqueSlug($pdo, 'servicios', $titulo, $id);
                 } else {
-                    if ($id > 0) {
-                        $stmt = $pdo->prepare("
-                            UPDATE servicios 
-                            SET categoria_id = :categoria_id, titulo = :titulo, slug = :slug, 
-                                descripcion = :descripcion, imagen = :imagen, beneficios = :beneficios, estado = :estado 
-                            WHERE id = :id
-                        ");
-                        $stmt->execute([
-                            'categoria_id' => $categoriaId,
-                            'titulo'       => $titulo,
-                            'slug'         => $slug,
-                            'descripcion'  => $descripcion,
-                            'imagen'       => $imagen,
-                            'beneficios'   => $beneficios,
-                            'estado'       => $estado,
-                            'id'           => $id
-                        ]);
-                        $_SESSION['flash_message'] = 'Servicio actualizado correctamente.';
-                    } else {
-                        $stmt = $pdo->prepare("
-                            INSERT INTO servicios (categoria_id, titulo, slug, descripcion, imagen, beneficios, estado) 
-                            VALUES (:categoria_id, :titulo, :slug, :descripcion, :imagen, :beneficios, :estado)
-                        ");
-                        $stmt->execute([
-                            'categoria_id' => $categoriaId,
-                            'titulo'       => $titulo,
-                            'slug'         => $slug,
-                            'descripcion'  => $descripcion,
-                            'imagen'       => $imagen,
-                            'beneficios'   => $beneficios,
-                            'estado'       => $estado
-                        ]);
-                        $_SESSION['flash_message'] = 'Servicio creado correctamente.';
-                    }
-                    header("Location: servicios.php");
-                    exit;
+                    $slug = generateUniqueSlug($pdo, 'servicios', $slug, $id);
                 }
+
+                if ($id > 0) {
+                    $stmt = $pdo->prepare("
+                        UPDATE servicios 
+                        SET categoria_id = :categoria_id, titulo = :titulo, slug = :slug, 
+                            descripcion = :descripcion, imagen = :imagen, beneficios = :beneficios, estado = :estado 
+                        WHERE id = :id
+                    ");
+                    $stmt->execute([
+                        'categoria_id' => $categoriaId,
+                        'titulo'       => $titulo,
+                        'slug'         => $slug,
+                        'descripcion'  => $descripcion,
+                        'imagen'       => $imagen,
+                        'beneficios'   => $beneficios,
+                        'estado'       => $estado,
+                        'id'           => $id
+                    ]);
+                    $_SESSION['flash_message'] = 'Servicio actualizado correctamente.';
+                } else {
+                    $stmt = $pdo->prepare("
+                        INSERT INTO servicios (categoria_id, titulo, slug, descripcion, imagen, beneficios, estado) 
+                        VALUES (:categoria_id, :titulo, :slug, :descripcion, :imagen, :beneficios, :estado)
+                    ");
+                    $stmt->execute([
+                        'categoria_id' => $categoriaId,
+                        'titulo'       => $titulo,
+                        'slug'         => $slug,
+                        'descripcion'  => $descripcion,
+                        'imagen'       => $imagen,
+                        'beneficios'   => $beneficios,
+                        'estado'       => $estado
+                    ]);
+                    $_SESSION['flash_message'] = 'Servicio creado correctamente.';
+                }
+                header("Location: servicios.php");
+                exit;
             }
 
             if (!empty($validationError)) {
@@ -194,7 +211,7 @@ require_once __DIR__ . '/includes/header.php';
       <?php echo $editService ? 'Editar Servicio #' . $editService['id'] : 'Crear Nuevo Servicio'; ?>
     </h2>
 
-    <form method="POST" action="servicios.php">
+    <form method="POST" action="servicios.php" enctype="multipart/form-data">
       <?php csrfField(); ?>
       <input type="hidden" name="action" value="save">
       <?php if ($editService): ?>
@@ -202,18 +219,21 @@ require_once __DIR__ . '/includes/header.php';
       <?php endif; ?>
 
       <div class="form-grid">
-        <div class="form-group-admin">
+        <div class="form-group-admin full">
           <label for="titulo">Título del Servicio *</label>
-          <input type="text" id="titulo" name="titulo" class="form-control-admin" maxlength="150" required value="<?php echo htmlspecialchars($editService['titulo'] ?? ''); ?>">
+          <input type="text" id="titulo" name="titulo" class="form-control-admin" maxlength="150" required 
+                 placeholder="Ej. Diseño Gráfico Profesional"
+                 value="<?php echo htmlspecialchars($editService['titulo'] ?? ''); ?>">
+          <input type="hidden" id="slug" name="slug" value="<?php echo htmlspecialchars($editService['slug'] ?? ''); ?>">
+          <small style="color: var(--devioz-gray); font-size: 0.82rem; margin-top: 0.35rem; display: flex; align-items: center; gap: 0.4rem;">
+            <span>🔗 Enlace web permanente (automático):</span>
+            <span id="slug-preview" style="color: var(--devioz-primary); font-family: monospace; font-size: 0.85rem;">
+              <?php echo htmlspecialchars($editService['slug'] ?? 'generado-al-escribir'); ?>
+            </span>
+          </small>
         </div>
 
-        <div class="form-group-admin">
-          <label for="slug">Slug URL *</label>
-          <input type="text" id="slug" name="slug" class="form-control-admin" maxlength="180" placeholder="ej-diseno-grafico" required value="<?php echo htmlspecialchars($editService['slug'] ?? ''); ?>">
-          <small style="color: var(--devioz-gray); font-size: 0.8rem;">Solo letras minúsculas, números y guiones.</small>
-        </div>
-
-        <div class="form-group-admin">
+        <div class="form-group-admin full">
           <label for="categoria_id">Categoría del Portafolio Vinculada</label>
           <select id="categoria_id" name="categoria_id" class="form-control-admin">
             <option value="">-- Sin categoría vinculada --</option>
@@ -226,19 +246,36 @@ require_once __DIR__ . '/includes/header.php';
           <small style="color: var(--devioz-gray); font-size: 0.8rem;">Relación formal con las categorías de la base de datos.</small>
         </div>
 
-        <div class="form-group-admin">
-          <label for="imagen">Ruta Imagen / Icono</label>
-          <input type="text" id="imagen" name="imagen" class="form-control-admin" maxlength="255" value="<?php echo htmlspecialchars($editService['imagen'] ?? 'assets/img/services/diseno-grafico.svg'); ?>">
+        <div class="form-group-admin full">
+          <label for="imagen_archivo">Icono o Imagen Ilustrativa del Servicio</label>
+          <div style="display: flex; gap: 1.25rem; align-items: center; background: rgba(0,0,0,0.25); border: 1px dashed var(--devioz-border); border-radius: 8px; padding: 1rem; flex-wrap: wrap;">
+            <?php 
+              $currentImg = $editService['imagen'] ?? 'assets/img/services/diseno-grafico.svg';
+              $previewSrc = '../frontend/' . ltrim($currentImg, '/');
+            ?>
+            <div id="image-preview-box" style="width: 70px; height: 70px; border-radius: 8px; overflow: hidden; background: #001a1a; display: flex; align-items: center; justify-content: center; border: 1px solid var(--devioz-border); flex-shrink: 0; padding: 8px;">
+              <img id="image-preview" src="<?php echo htmlspecialchars($previewSrc); ?>" alt="Icono" style="width: 100%; height: 100%; object-fit: contain;" onerror="this.src='../frontend/assets/img/services/diseno-grafico.svg'">
+            </div>
+            <div style="flex-grow: 1; min-width: 240px;">
+              <input type="file" id="imagen_archivo" name="imagen_archivo" accept="image/*" class="form-control-admin" style="padding: 0.5rem; background: var(--devioz-dark);">
+              <input type="hidden" name="imagen_actual" value="<?php echo htmlspecialchars($currentImg); ?>">
+              <small style="color: var(--devioz-gray); font-size: 0.8rem; display: block; margin-top: 0.35rem;">
+                Selecciona una imagen o SVG desde tu equipo. Si no seleccionas una nueva, se mantendrá la actual.
+              </small>
+            </div>
+          </div>
         </div>
 
         <div class="form-group-admin full">
           <label for="descripcion">Descripción *</label>
-          <textarea id="descripcion" name="descripcion" class="form-control-admin" maxlength="5000" required><?php echo htmlspecialchars($editService['descripcion'] ?? ''); ?></textarea>
+          <textarea id="descripcion" name="descripcion" class="form-control-admin" maxlength="5000" required rows="3" placeholder="Describe brevemente la propuesta de valor del servicio..."><?php echo htmlspecialchars($editService['descripcion'] ?? ''); ?></textarea>
         </div>
 
         <div class="form-group-admin full">
-          <label for="beneficios">Beneficios (Separados por pipe |)</label>
-          <input type="text" id="beneficios" name="beneficios" class="form-control-admin" maxlength="1000" placeholder="Beneficio 1|Beneficio 2|Beneficio 3" value="<?php echo htmlspecialchars($editService['beneficios'] ?? ''); ?>">
+          <label for="beneficios">Beneficios Destacados (Un beneficio por línea)</label>
+          <?php $beneficiosTxt = isset($editService['beneficios']) ? str_replace('|', "\n", $editService['beneficios']) : ''; ?>
+          <textarea id="beneficios" name="beneficios" class="form-control-admin" rows="3" placeholder="Branding e Identidad Corporativa&#10;Piezas para Redes & Campañas&#10;Presentaciones de Alto Impacto"><?php echo htmlspecialchars($beneficiosTxt); ?></textarea>
+          <small style="color: var(--devioz-gray); font-size: 0.8rem;">Escribe cada característica clave en una línea distinta (se mostrarán con checks en la web).</small>
         </div>
 
         <div class="form-group-admin full">
@@ -261,9 +298,9 @@ require_once __DIR__ . '/includes/header.php';
     <table class="admin-table">
       <thead>
         <tr>
+          <th>Icono</th>
           <th>Título</th>
           <th>Categoría Vinculada</th>
-          <th>Slug</th>
           <th>Beneficios</th>
           <th>Estado</th>
           <th>Acciones</th>
@@ -272,7 +309,10 @@ require_once __DIR__ . '/includes/header.php';
       <tbody>
         <?php foreach ($services as $s): ?>
           <tr>
-            <td><strong><?php echo htmlspecialchars($s['titulo']); ?></strong></td>
+            <td style="width: 50px; text-align: center;">
+              <img src="../frontend/<?php echo htmlspecialchars($s['imagen']); ?>" alt="Icono" style="width: 32px; height: 32px; object-fit: contain; display: inline-block;" onerror="this.src='../frontend/assets/img/services/diseno-grafico.svg'">
+            </td>
+            <td><strong><?php echo htmlspecialchars($s['titulo']); ?></strong><br><small style="color: var(--devioz-gray); font-family: monospace;"><?php echo htmlspecialchars($s['slug']); ?></small></td>
             <td>
               <?php if (!empty($s['categoria_nombre'])): ?>
                 <span class="badge badge-info"><?php echo htmlspecialchars($s['categoria_nombre']); ?></span>

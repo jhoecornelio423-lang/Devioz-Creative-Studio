@@ -7,6 +7,7 @@ require_once __DIR__ . '/includes/auth.php';
 require_once __DIR__ . '/includes/csrf.php';
 require_once __DIR__ . '/../backend/config/database.php';
 require_once __DIR__ . '/../backend/helpers/validation.php';
+require_once __DIR__ . '/includes/upload.php';
 
 $pdo = getPDOConnection();
 
@@ -57,33 +58,31 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $estado = isset($_POST['estado']) ? 1 : 0;
 
             $validationError = '';
-            if (empty($nombre) || empty($slug)) {
-                $validationError = 'El nombre y el slug de la categoría son obligatorios.';
+            if (empty($nombre)) {
+                $validationError = 'El nombre de la categoría es obligatorio.';
             } elseif (!validateMaxLength($nombre, 100)) {
                 $validationError = 'El nombre de la categoría no puede superar los 100 caracteres.';
-            } elseif (!isValidSlug($slug, 120)) {
-                $validationError = 'El slug no es válido. Solo debe contener letras minúsculas, números y guiones sencillos (máx 120 caracteres).';
             } elseif (!isValidStatus($estado, [0, 1])) {
                 $validationError = 'El estado proporcionado no es válido.';
             } else {
-                $stmtCheck = $pdo->prepare("SELECT id FROM categorias WHERE slug = :slug AND id != :id LIMIT 1");
-                $stmtCheck->execute(['slug' => $slug, 'id' => $id]);
-
-                if ($stmtCheck->fetch()) {
-                    $validationError = "El slug '{$slug}' ya está registrado en otra categoría. Por favor, especifique uno diferente.";
+                // Generación y garantía de unicidad automática del Slug
+                if (empty($slug)) {
+                    $slug = generateUniqueSlug($pdo, 'categorias', $nombre, $id);
                 } else {
-                    if ($id > 0) {
-                        $stmt = $pdo->prepare("UPDATE categorias SET nombre = :nombre, slug = :slug, estado = :estado WHERE id = :id");
-                        $stmt->execute(['nombre' => $nombre, 'slug' => $slug, 'estado' => $estado, 'id' => $id]);
-                        $_SESSION['flash_message'] = 'Categoría actualizada correctamente.';
-                    } else {
-                        $stmt = $pdo->prepare("INSERT INTO categorias (nombre, slug, estado) VALUES (:nombre, :slug, :estado)");
-                        $stmt->execute(['nombre' => $nombre, 'slug' => $slug, 'estado' => $estado]);
-                        $_SESSION['flash_message'] = 'Categoría creada correctamente.';
-                    }
-                    header("Location: categorias.php");
-                    exit;
+                    $slug = generateUniqueSlug($pdo, 'categorias', $slug, $id);
                 }
+
+                if ($id > 0) {
+                    $stmt = $pdo->prepare("UPDATE categorias SET nombre = :nombre, slug = :slug, estado = :estado WHERE id = :id");
+                    $stmt->execute(['nombre' => $nombre, 'slug' => $slug, 'estado' => $estado, 'id' => $id]);
+                    $_SESSION['flash_message'] = 'Categoría actualizada correctamente.';
+                } else {
+                    $stmt = $pdo->prepare("INSERT INTO categorias (nombre, slug, estado) VALUES (:nombre, :slug, :estado)");
+                    $stmt->execute(['nombre' => $nombre, 'slug' => $slug, 'estado' => $estado]);
+                    $_SESSION['flash_message'] = 'Categoría creada correctamente.';
+                }
+                header("Location: categorias.php");
+                exit;
             }
 
             if (!empty($validationError)) {
@@ -181,15 +180,18 @@ require_once __DIR__ . '/includes/header.php';
       <?php endif; ?>
 
       <div class="form-grid">
-        <div class="form-group-admin">
+        <div class="form-group-admin full">
           <label for="nombre">Nombre de la Categoría *</label>
-          <input type="text" id="nombre" name="nombre" class="form-control-admin" maxlength="100" required value="<?php echo htmlspecialchars($editCategory['nombre'] ?? ''); ?>">
-        </div>
-
-        <div class="form-group-admin">
-          <label for="slug">Slug URL *</label>
-          <input type="text" id="slug" name="slug" class="form-control-admin" maxlength="120" placeholder="ej-branding" required value="<?php echo htmlspecialchars($editCategory['slug'] ?? ''); ?>">
-          <small style="color: var(--devioz-gray); font-size: 0.8rem;">Solo letras minúsculas, números y guiones.</small>
+          <input type="text" id="nombre" name="nombre" class="form-control-admin" maxlength="100" required 
+                 placeholder="Ej. Diseño Gráfico, Animación 3D"
+                 value="<?php echo htmlspecialchars($editCategory['nombre'] ?? ''); ?>">
+          <input type="hidden" id="slug" name="slug" value="<?php echo htmlspecialchars($editCategory['slug'] ?? ''); ?>">
+          <small style="color: var(--devioz-gray); font-size: 0.82rem; margin-top: 0.35rem; display: flex; align-items: center; gap: 0.4rem;">
+            <span>🔗 Enlace web permanente (automático):</span>
+            <span id="slug-preview" style="color: var(--devioz-primary); font-family: monospace; font-size: 0.85rem;">
+              <?php echo htmlspecialchars($editCategory['slug'] ?? 'generado-al-escribir'); ?>
+            </span>
+          </small>
         </div>
 
         <div class="form-group-admin full">
