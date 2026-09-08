@@ -6,7 +6,7 @@ $currentPage = basename($_SERVER['PHP_SELF']);
 ?>
 <aside class="sidebar">
   <div class="sidebar-header">
-    <img src="assets/img/logo-devioz-3d.jpg" alt="Devioz Logo 3D" class="sidebar-logo-3d">
+    <img src="assets/img/logo-devioz-3d.jpg" alt="Devioz Logo 3D" class="sidebar-logo-3d" onerror="this.onerror=null; this.src='assets/img/logo-devioz.png';">
     <div class="sidebar-brand-text">
       Devioz <span>Admin</span>
     </div>

@@ -250,11 +250,11 @@ require_once __DIR__ . '/includes/header.php';
           <label for="imagen_archivo">Icono o Imagen Ilustrativa del Servicio</label>
           <div style="display: flex; gap: 1.25rem; align-items: center; background: rgba(0,0,0,0.25); border: 1px dashed var(--devioz-border); border-radius: 8px; padding: 1rem; flex-wrap: wrap;">
             <?php 
-              $currentImg = $editService['imagen'] ?? 'assets/img/services/diseno-grafico.svg';
+              $currentImg = !empty($editService['imagen']) ? $editService['imagen'] : 'assets/img/services/diseno-grafico.svg';
               $previewSrc = '../frontend/' . ltrim($currentImg, '/');
             ?>
             <div id="image-preview-box" style="width: 70px; height: 70px; border-radius: 8px; overflow: hidden; background: #001a1a; display: flex; align-items: center; justify-content: center; border: 1px solid var(--devioz-border); flex-shrink: 0; padding: 8px;">
-              <img id="image-preview" src="<?php echo htmlspecialchars($previewSrc); ?>" alt="Icono" style="width: 100%; height: 100%; object-fit: contain;" onerror="this.src='../frontend/assets/img/services/diseno-grafico.svg'">
+              <img id="image-preview" src="<?php echo htmlspecialchars($previewSrc); ?>" alt="Icono" style="width: 100%; height: 100%; object-fit: contain;" onerror="this.onerror=null; this.src='../frontend/assets/img/services/diseno-grafico.svg';">
             </div>
             <div style="flex-grow: 1; min-width: 240px;">
               <input type="file" id="imagen_archivo" name="imagen_archivo" accept="image/*" class="form-control-admin" style="padding: 0.5rem; background: var(--devioz-dark);">
@@ -298,7 +298,7 @@ require_once __DIR__ . '/includes/header.php';
     <table class="admin-table">
       <thead>
         <tr>
-          <th>Icono</th>
+          <th style="width: 50px; text-align: center;">Icono</th>
           <th>Título</th>
           <th>Categoría Vinculada</th>
           <th>Beneficios</th>
@@ -310,7 +310,12 @@ require_once __DIR__ . '/includes/header.php';
         <?php foreach ($services as $s): ?>
           <tr>
             <td style="width: 50px; text-align: center;">
-              <img src="../frontend/<?php echo htmlspecialchars($s['imagen']); ?>" alt="Icono" style="width: 32px; height: 32px; object-fit: contain; display: inline-block;" onerror="this.src='../frontend/assets/img/services/diseno-grafico.svg'">
+              <div style="width: 36px; height: 36px; border-radius: 6px; background: #001a1a; display: flex; align-items: center; justify-content: center; overflow: hidden; margin: 0 auto; border: 1px solid var(--devioz-border); padding: 4px;">
+                <?php 
+                  $serviceImg = !empty($s['imagen']) ? '../frontend/' . ltrim($s['imagen'], '/') : '../frontend/assets/img/services/diseno-grafico.svg';
+                ?>
+                <img src="<?php echo htmlspecialchars($serviceImg); ?>" alt="Icono" style="width: 100%; height: 100%; object-fit: contain; display: block;" onerror="this.onerror=null; this.src='../frontend/assets/img/services/diseno-grafico.svg';">
+              </div>
             </td>
             <td><strong><?php echo htmlspecialchars($s['titulo']); ?></strong><br><small style="color: var(--devioz-gray); font-family: monospace;"><?php echo htmlspecialchars($s['slug']); ?></small></td>
             <td>
@@ -320,7 +325,6 @@ require_once __DIR__ . '/includes/header.php';
                 <span style="color: var(--devioz-gray);">-</span>
               <?php endif; ?>
             </td>
-            <td><code><?php echo htmlspecialchars($s['slug']); ?></code></td>
             <td><small><?php echo htmlspecialchars($s['beneficios']); ?></small></td>
             <td>
               <?php if ($s['estado'] == 1): ?>

@@ -76,7 +76,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
   <div class="login-card">
     <div class="login-logo">
-      <img src="assets/img/logo-devioz-3d.jpg" alt="Devioz Logo 3D" class="login-logo-3d">
+      <img src="assets/img/logo-devioz-3d.jpg" alt="Devioz Logo 3D" class="login-logo-3d" onerror="this.onerror=null; this.src='assets/img/logo-devioz.png';">
       <div class="login-brand-text">
         Devioz <span>Admin</span>
       </div>

@@ -276,11 +276,11 @@ require_once __DIR__ . '/includes/header.php';
           <label for="imagen_archivo">Fotografía o Imagen del Proyecto</label>
           <div style="display: flex; gap: 1.25rem; align-items: center; background: rgba(0,0,0,0.25); border: 1px dashed var(--devioz-border); border-radius: 8px; padding: 1rem; flex-wrap: wrap;">
             <?php 
-              $currentImg = $editProject['imagen'] ?? 'assets/img/portfolio/project-1.svg';
+              $currentImg = !empty($editProject['imagen']) ? $editProject['imagen'] : 'assets/img/portfolio/project-1.svg';
               $previewSrc = '../frontend/' . ltrim($currentImg, '/');
             ?>
             <div id="image-preview-box" style="width: 120px; height: 80px; border-radius: 6px; overflow: hidden; background: #001a1a; display: flex; align-items: center; justify-content: center; border: 1px solid var(--devioz-border); flex-shrink: 0;">
-              <img id="image-preview" src="<?php echo htmlspecialchars($previewSrc); ?>" alt="Vista previa" style="width: 100%; height: 100%; object-fit: cover;" onerror="this.src='../frontend/assets/img/portfolio/project-1.svg'">
+              <img id="image-preview" src="<?php echo htmlspecialchars($previewSrc); ?>" alt="Vista previa" style="width: 100%; height: 100%; object-fit: cover;" onerror="this.onerror=null; this.src='../frontend/assets/img/portfolio/project-1.svg';">
             </div>
             <div style="flex-grow: 1; min-width: 240px;">
               <input type="file" id="imagen_archivo" name="imagen_archivo" accept="image/*" class="form-control-admin" style="padding: 0.5rem; background: var(--devioz-dark);">
@@ -337,7 +337,10 @@ require_once __DIR__ . '/includes/header.php';
         <?php foreach ($projects as $p): ?>
           <tr>
             <td style="width: 60px;">
-              <img src="../frontend/<?php echo htmlspecialchars($p['imagen']); ?>" alt="Img" style="width: 48px; height: 34px; object-fit: cover; border-radius: 4px; border: 1px solid var(--devioz-border); display: block;" onerror="this.src='../frontend/assets/img/portfolio/project-1.svg'">
+              <?php 
+                $projImg = !empty($p['imagen']) ? '../frontend/' . ltrim($p['imagen'], '/') : '../frontend/assets/img/portfolio/project-1.svg';
+              ?>
+              <img src="<?php echo htmlspecialchars($projImg); ?>" alt="Img" style="width: 48px; height: 34px; object-fit: cover; border-radius: 4px; border: 1px solid var(--devioz-border); display: block;" onerror="this.onerror=null; this.src='../frontend/assets/img/portfolio/project-1.svg';">
             </td>
             <td><strong><?php echo htmlspecialchars($p['titulo']); ?></strong><br><small style="color: var(--devioz-gray); font-family: monospace;"><?php echo htmlspecialchars($p['slug']); ?></small></td>
             <td>

@@ -192,7 +192,7 @@ async function loadPortfolio() {
         gridHtml += `
           <article class="portfolio-item ${isHidden ? 'hidden' : ''}" data-category="${escapeHtml(p.categoria_slug)}" id="project-card-${p.id}">
             <div class="portfolio-img-wrapper">
-              <img src="${imgUrl}" alt="${escapeHtml(p.titulo)}" width="800" height="500" loading="lazy">
+              <img src="${imgUrl}" alt="${escapeHtml(p.titulo)}" width="800" height="500" loading="lazy" onerror="this.onerror=null; this.src='assets/img/portfolio/project-1.svg';">
               <span class="portfolio-badge">${escapeHtml(p.categoria_nombre)}</span>
             </div>
             <div class="portfolio-info">
@@ -268,7 +268,15 @@ async function loadServices() {
 
     let servicesHtml = '';
     services.forEach((s, idx) => {
-      const icon = iconSvgs[idx % iconSvgs.length];
+      const defaultIcon = iconSvgs[idx % iconSvgs.length];
+      let iconContent = defaultIcon;
+      if (s.imagen && typeof s.imagen === 'string' && s.imagen.trim() !== '') {
+        const cleanImg = escapeHtml(s.imagen.trim());
+        iconContent = `
+          <img src="${cleanImg}" alt="${escapeHtml(s.titulo)}" style="width: 32px; height: 32px; object-fit: contain; display: block;" onerror="this.onerror=null; this.style.display='none'; this.nextElementSibling.style.display='block';">
+          <div style="display: none;">${defaultIcon}</div>
+        `;
+      }
       let benefitsList = '';
       if (Array.isArray(s.beneficios) && s.beneficios.length > 0) {
         benefitsList = s.beneficios.map(b => `
@@ -282,7 +290,7 @@ async function loadServices() {
       servicesHtml += `
         <article class="service-card" id="service-card-${s.id}">
           <div class="service-icon">
-            ${icon}
+            ${iconContent}
           </div>
           <h3 class="service-title">${escapeHtml(s.titulo)}</h3>
           <p class="service-description">${escapeHtml(s.descripcion)}</p>
