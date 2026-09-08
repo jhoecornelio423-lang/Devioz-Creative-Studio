@@ -222,7 +222,11 @@ async function loadPortfolio() {
     } else {
       let gridHtml = '';
       projects.forEach(p => {
-        const imgUrl = p.imagen ? escapeHtml(p.imagen) : '/frontend/assets/img/portfolio/project-1.svg';
+        let rawImg = p.imagen || '/frontend/assets/img/portfolio/project-1.svg';
+        if (rawImg.startsWith('assets/')) {
+          rawImg = '/frontend/' + rawImg;
+        }
+        const imgUrl = escapeHtml(rawImg);
         const isHidden = (selectedFilter !== 'todos' && p.categoria_slug !== selectedFilter);
         gridHtml += `
           <article class="portfolio-item ${isHidden ? 'hidden' : ''}" data-category="${escapeHtml(p.categoria_slug)}" id="project-card-${p.id}">

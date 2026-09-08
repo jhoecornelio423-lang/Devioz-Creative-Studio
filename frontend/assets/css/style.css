@@ -252,7 +252,7 @@ ul {
 .nav-menu {
   display: flex;
   align-items: center;
-  gap: 2rem;
+  gap: 1.5rem;
 }
 
 .nav-link {
@@ -262,6 +262,7 @@ ul {
   color: var(--devioz-gray);
   position: relative;
   padding: 0.4rem 0;
+  white-space: nowrap;
 }
 
 .nav-link:hover,
@@ -290,6 +291,11 @@ ul {
   display: flex;
   align-items: center;
   gap: 1rem;
+  flex-shrink: 0;
+}
+
+.nav-cta .btn {
+  white-space: nowrap;
 }
 
 .mobile-toggle {
@@ -625,7 +631,7 @@ ul {
   justify-content: center;
   gap: 0.75rem;
   flex-wrap: wrap;
-  margin-bottom: 3rem;
+  margin-bottom: 2rem;
 }
 
 .filter-btn {
@@ -1129,18 +1135,34 @@ textarea.form-control {
 }
 
 /* ==========================================================================
-   PÁGINAS INDEPENDIENTES (PORTAFOLIO & COTIZACIÓN)
+   PÁGINAS INDEPENDIENTES (PORTAFOLIO, PLANES, BLOG & COTIZACIÓN)
    ========================================================================== */
 .page-header-section {
-  padding-top: 9.5rem;
-  padding-bottom: 5rem;
-  min-height: 80vh;
+  padding-top: 7rem;
+  padding-bottom: 1.25rem;
   position: relative;
   overflow: hidden;
+  text-align: center;
 }
 
 .page-header-section .section-header {
-  margin-bottom: 2.5rem;
+  margin-bottom: 0;
+  max-width: 820px;
+}
+
+.page-header-section .section-subtitle {
+  margin-bottom: 0;
+}
+
+.page-header-section .contact-wrapper {
+  margin-top: 2rem;
+  margin-bottom: 2rem;
+}
+
+.portfolio-section {
+  padding-top: 1.25rem;
+  padding-bottom: 5rem;
+  position: relative;
 }
 
 /* Banner de CTA al final de páginas */
@@ -1252,7 +1274,7 @@ textarea.form-control {
    PRICING & PLANES SECTION
    ========================================================================== */
 .pricing-section {
-  padding: 3rem 0 5rem 0;
+  padding: 1.25rem 0 5rem 0;
   position: relative;
 }
 
@@ -1490,7 +1512,7 @@ textarea.form-control {
    BLOG SECTION
    ========================================================================== */
 .blog-section {
-  padding: 3rem 0 5rem 0;
+  padding: 1.25rem 0 5rem 0;
 }
 
 .blog-filter-bar {
@@ -1498,7 +1520,7 @@ textarea.form-control {
   flex-wrap: wrap;
   gap: 0.75rem;
   justify-content: center;
-  margin-bottom: 3.5rem;
+  margin-bottom: 2rem;
 }
 
 .blog-filter-btn {
