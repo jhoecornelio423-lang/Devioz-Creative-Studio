@@ -27,9 +27,6 @@ DROP TABLE IF EXISTS `categorias`;
 DROP TABLE IF EXISTS `configuracion`;
 DROP TABLE IF EXISTS `usuarios`;
 
--- Reactivar verificación de llaves foráneas para la creación de esquemas
-SET FOREIGN_KEY_CHECKS = 1;
-
 -- ----------------------------------------------------------------------------
 -- 1. TABLA: usuarios
 -- Guarda los accesos al panel administrativo.
@@ -45,7 +42,20 @@ CREATE TABLE `usuarios` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- ----------------------------------------------------------------------------
--- 2. TABLA: servicios
+-- 2. TABLA: categorias
+-- Categorías principales del portafolio (Tabla padre para proyectos y servicios).
+-- ----------------------------------------------------------------------------
+CREATE TABLE `categorias` (
+  `id` INT AUTO_INCREMENT PRIMARY KEY,
+  `nombre` VARCHAR(100) NOT NULL,
+  `slug` VARCHAR(120) NOT NULL UNIQUE,
+  `estado` TINYINT DEFAULT 1 COMMENT '1: Activo, 0: Inactivo',
+  `creado_en` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  KEY `idx_categorias_estado` (`estado`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- ----------------------------------------------------------------------------
+-- 3. TABLA: servicios
 -- Guarda los 5 servicios creativos principales mostrados en la web.
 -- ----------------------------------------------------------------------------
 CREATE TABLE `servicios` (
@@ -65,19 +75,6 @@ CREATE TABLE `servicios` (
     REFERENCES `categorias` (`id`) 
     ON DELETE SET NULL 
     ON UPDATE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
--- ----------------------------------------------------------------------------
--- 3. TABLA: categorias
--- Categorías principales del portafolio (Tabla padre para proyectos y servicios).
--- ----------------------------------------------------------------------------
-CREATE TABLE `categorias` (
-  `id` INT AUTO_INCREMENT PRIMARY KEY,
-  `nombre` VARCHAR(100) NOT NULL,
-  `slug` VARCHAR(120) NOT NULL UNIQUE,
-  `estado` TINYINT DEFAULT 1 COMMENT '1: Activo, 0: Inactivo',
-  `creado_en` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-  KEY `idx_categorias_estado` (`estado`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- ----------------------------------------------------------------------------
@@ -191,3 +188,6 @@ INSERT INTO `configuracion` (`clave`, `valor`) VALUES
 ('sede_principal', 'Lima, Perú'),
 ('telefono_contacto', '999 999 999'),
 ('horario_atencion', 'Lun - Vie: 9:00 AM - 6:00 PM');
+
+-- Reactivar verificación de llaves foráneas
+SET FOREIGN_KEY_CHECKS = 1;
