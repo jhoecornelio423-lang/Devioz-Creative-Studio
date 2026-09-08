@@ -1,0 +1,299 @@
+﻿<!DOCTYPE html>
+<html lang=es>
+<head>
+  <meta charset=UTF-8>
+  <meta name=viewport content=width=device-width, initial-scale=1.0>
+  <title>Blog & Insights - Devioz Creative Studio</title>
+  <meta name=description content=Artículos, tendencias y recursos sobre producción de video, diseño gráfico, branding y estrategia visual por el equipo de Devioz Creative Studio.>
+  <meta name=robots content=index, follow>
+
+  <!-- Open Graph -->
+  <meta property=og:title content=Blog & Insights - Devioz Creative Studio>
+  <meta property=og:description content=Estrategias, análisis y tendencias visuales para potenciar tu marca.>
+  <meta property=og:image content=/frontend/assets/img/hero-devioz-studio.jpg>
+  <meta property=og:type content=website>
+
+  <!-- Favicon -->
+  <link rel=icon type=image/png href=/frontend/assets/img/logo-devioz.png>
+
+  <!-- Google Fonts: Syne & Inter -->
+  <link rel=preconnect href=https://fonts.googleapis.com>
+  <link rel=preconnect href=https://fonts.gstatic.com crossorigin>
+  <link href=https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Syne:wght@700;800&display=swap rel=stylesheet>
+
+  <!-- CSS Principal -->
+  <link rel=stylesheet href=/frontend/assets/css/style.css>
+</head>
+<body>
+
+  <!-- HEADER / NAVEGACIÓN -->
+  <header class=header id=header>
+    <div class=container nav-container>
+      <a href=/inicio class=logo id=main-logo aria-label=Devioz Creative Studio Inicio>
+        <img src=/frontend/assets/img/logo-devioz.png alt=Devioz Logo class=logo-img>
+        <span class=logo-badge>Creative Studio</span>
+      </a>
+
+      <nav class=nav-menu id=nav-menu>
+        <a href=/inicio class=nav-link>Inicio</a>
+        <a href=/portafolio class=nav-link>Portafolio</a>
+        <a href=/planes class=nav-link>Planes</a>
+        <a href=/blog class=nav-link active>Blog</a>
+      </nav>
+
+      <div class=nav-cta>
+        <a href=/cotizacion class=btn btn-primary id=header-cta-btn>Solicitar cotización</a>
+      </div>
+
+      <button class=mobile-toggle id=mobile-toggle aria-label=Abrir menú de navegación aria-expanded=false>
+        &#9776;
+      </button>
+    </div>
+  </header>
+
+  <main>
+    <!-- CABECERA DE PÁGINA BLOG -->
+    <section class=page-header-section>
+      <div class=hero-glow></div>
+      <div class=container>
+        <div class=section-header>
+          <span class=section-badge>✦ Insights, Ideas &amp; Tendencias</span>
+          <h1 class=section-title>Blog de Devioz Creative Studio</h1>
+          <p class=section-subtitle>
+            Análisis, metodologías y aprendizajes sobre producción audiovisual, identidad de marca y diseño visual para impulsar negocios en la era digital.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <!-- SECCIÓN DE ARTÍCULOS CON FILTROS -->
+    <section class=blog-section>
+      <div class=container>
+
+        <!-- Barra de Filtros -->
+        <div class=blog-filter-bar>
+          <button type=button class=blog-filter-btn active data-category=all>Todos los artículos</button>
+          <button type=button class=blog-filter-btn data-category=video>Producción Audiovisual</button>
+          <button type=button class=blog-filter-btn data-category=branding>Branding &amp; Identidad</button>
+          <button type=button class=blog-filter-btn data-category=diseno>Diseño Gráfico</button>
+          <button type=button class=blog-filter-btn data-category=estrategia>Estrategia &amp; Conversión</button>
+        </div>
+
+        <!-- Grid de Artículos -->
+        <div class=blog-grid id=blogGrid>
+
+          <!-- Artículo 1 -->
+          <article class=blog-card data-category=video>
+            <div class=blog-thumb-wrap>
+              <img src=/frontend/assets/img/flyer-devioz-rodaje.jpg alt=Producción de video vertical en 4K class=blog-thumb loading=lazy>
+              <span class=blog-tag-badge>Audiovisual</span>
+            </div>
+            <div class=blog-body>
+              <div class=blog-meta>
+                <span>⏱ 8 Min lectura</span>
+                <span>•</span>
+                <span>15 Ago 2026</span>
+              </div>
+              <h2 class=blog-title>El poder del video vertical en 2026: Cómo los Reels de alta gama multiplican la retención</h2>
+              <p class=blog-excerpt>
+                El usuario promedio detecta la calidad en los primeros 2 segundos. Analizamos cómo la iluminación cinematográfica, los ganchos visuales y el ritmo de corte aumentan el engagement comercial.
+              </p>
+              <div class=blog-footer>
+                <span class=blog-author>Por Equipo Devioz</span>
+                <a href=/cotizacion?servicio=produccion-videos class=blog-read-more>Ver producción <span>&rarr;</span></a>
+              </div>
+            </div>
+          </article>
+
+          <!-- Artículo 2 -->
+          <article class=blog-card data-category=branding>
+            <div class=blog-thumb-wrap>
+              <img src=/frontend/assets/img/hero-devioz-studio.jpg alt=Identidad de marca profesional class=blog-thumb loading=lazy>
+              <span class=blog-tag-badge>Branding</span>
+            </div>
+            <div class=blog-body>
+              <div class=blog-meta>
+                <span>⏱ 6 Min lectura</span>
+                <span>•</span>
+                <span>02 Ago 2026</span>
+              </div>
+              <h2 class=blog-title>Identidad visual vs. Logotipo: Por qué tu marca necesita más que una imagen bonita</h2>
+              <p class=blog-excerpt>
+                Un logotipo es solo una parte de tu marca. Conoce cómo un sistema de diseño consistente con paletas emocionales, tipografías y reglas de aplicación genera valor a largo plazo.
+              </p>
+              <div class=blog-footer>
+                <span class=blog-author>Por Equipo Devioz</span>
+                <a href=/cotizacion?servicio=diseno-grafico class=blog-read-more>Ver branding <span>&rarr;</span></a>
+              </div>
+            </div>
+          </article>
+
+          <!-- Artículo 3 -->
+          <article class=blog-card data-category=video>
+            <div class=blog-thumb-wrap>
+              <img src=/frontend/assets/img/flyer-devioz-postproduccion.jpg alt=Postproducción y color grading class=blog-thumb loading=lazy>
+              <span class=blog-tag-badge>Postproducción</span>
+            </div>
+            <div class=blog-body>
+              <div class=blog-meta>
+                <span>⏱ 7 Min lectura</span>
+                <span>•</span>
+                <span>22 Jul 2026</span>
+              </div>
+              <h2 class=blog-title>Color Grading en DaVinci Resolve: La ciencia detrás del 'look' cinematográfico</h2>
+              <p class=blog-excerpt>
+                La corrección y etalonaje de color despiertan sensaciones psicológicas precisas en el espectador. Te mostramos cómo el balance cromático define el posicionamiento premium de un spot.
+              </p>
+              <div class=blog-footer>
+                <span class=blog-author>Por Equipo Devioz</span>
+                <a href=/cotizacion?servicio=spots-publicitarios class=blog-read-more>Ver spots <span>&rarr;</span></a>
+              </div>
+            </div>
+          </article>
+
+          <!-- Artículo 4 -->
+          <article class=blog-card data-category=diseno>
+            <div class=blog-thumb-wrap>
+              <img src=/frontend/assets/img/flyer-devioz-devices.jpg alt=Diseño publicitario multiformato class=blog-thumb loading=lazy>
+              <span class=blog-tag-badge>Diseño</span>
+            </div>
+            <div class=blog-body>
+              <div class=blog-meta>
+                <span>⏱ 5 Min lectura</span>
+                <span>•</span>
+                <span>10 Jul 2026</span>
+              </div>
+              <h2 class=blog-title>Composición y jerarquía visual en anuncios digitales: Cómo evitar el scroll ciego</h2>
+              <p class=blog-excerpt>
+                En un feed lleno de estímulos, la dirección de arte debe ser implacable. Principios de contraste, tipografía contundente y espacios negativos para maximizar el CTR de tus campañas.
+              </p>
+              <div class=blog-footer>
+                <span class=blog-author>Por Equipo Devioz</span>
+                <a href=/cotizacion?servicio=diseno-grafico class=blog-read-more>Ver diseño <span>&rarr;</span></a>
+              </div>
+            </div>
+          </article>
+
+          <!-- Artículo 5 -->
+          <article class=blog-card data-category=estrategia>
+            <div class=blog-thumb-wrap>
+              <img src=/frontend/assets/img/flyer-devioz-pantallas.jpg alt=Estrategia y producción de comerciales class=blog-thumb loading=lazy>
+              <span class=blog-tag-badge>Estrategia</span>
+            </div>
+            <div class=blog-body>
+              <div class=blog-meta>
+                <span>⏱ 9 Min lectura</span>
+                <span>•</span>
+                <span>28 Jun 2026</span>
+              </div>
+              <h2 class=blog-title>La anatomía de un Spot Publicitario: Del guion estratégico al corte final</h2>
+              <p class=blog-excerpt>
+                Estructura paso a paso para comerciales que no solo se ven espectaculares, sino que mueven la aguja de ventas: narrativa persuasiva, planos con intención y llamados a la acción claros.
+              </p>
+              <div class=blog-footer>
+                <span class=blog-author>Por Equipo Devioz</span>
+                <a href=/cotizacion?servicio=spots-publicitarios class=blog-read-more>Ver comerciales <span>&rarr;</span></a>
+              </div>
+            </div>
+          </article>
+
+          <!-- Artículo 6 -->
+          <article class=blog-card data-category=estrategia>
+            <div class=blog-thumb-wrap>
+              <img src=/frontend/assets/img/flyer-oficial-devioz.png alt=Brief creativo profesional class=blog-thumb loading=lazy>
+              <span class=blog-tag-badge>Guía Práctica</span>
+            </div>
+            <div class=blog-body>
+              <div class=blog-meta>
+                <span>⏱ 4 Min lectura</span>
+                <span>•</span>
+                <span>14 Jun 2026</span>
+              </div>
+              <h2 class=blog-title>Cómo armar un Brief Creativo perfecto antes de contratar a un estudio</h2>
+              <p class=blog-excerpt>
+                Ahorra tiempo, evita rondas interminables de correcciones y alinea expectativas desde el día uno. Las 5 preguntas clave que debes responder antes de iniciar tu próximo proyecto visual.
+              </p>
+              <div class=blog-footer>
+                <span class=blog-author>Por Equipo Devioz</span>
+                <a href=/cotizacion class=blog-read-more>Cotizar proyecto <span>&rarr;</span></a>
+              </div>
+            </div>
+          </article>
+
+        </div>
+
+        <!-- BANNER FINAL CTA -->
+        <div class=page-cta-banner>
+          <div>
+            <h3 class=page-cta-title>¿Listo para llevar la comunicación visual de tu empresa al siguiente nivel?</h3>
+            <p class=page-cta-desc>Trabajemos juntos en una producción audiovisual o identidad de marca con visión estratégica.</p>
+          </div>
+          <a href=/cotizacion class=btn btn-primary page-cta-btn>Solicitar cotización</a>
+        </div>
+
+      </div>
+    </section>
+  </main>
+
+  <!-- FOOTER -->
+  <footer class=footer>
+    <div class=container>
+      <div class=footer-grid>
+        <div class=footer-about>
+          <a href=/inicio class=logo>
+            <img src=/frontend/assets/img/logo-devioz.png alt=Devioz Logo class=logo-img style=height: 32px;>
+            <span class=logo-badge>Creative Studio</span>
+          </a>
+          <p>
+            Devioz Creative Studio, una extensión creativa de Devioz para diseño, video y contenido visual profesional.
+          </p>
+          <a href=https://devioz.com/ target=_blank rel=noopener noreferrer class=footer-external id=footer-external-link>
+            Visitar Devioz Oficial (devioz.com) &rarr;
+          </a>
+        </div>
+
+        <div>
+          <h4 class=footer-title>Navegación</h4>
+          <ul class=footer-links>
+            <li><a href=/inicio>Inicio</a></li>
+            <li><a href=/portafolio>Portafolio</a></li>
+            <li><a href=/planes>Planes</a></li>
+            <li><a href=/blog>Blog</a></li>
+            <li><a href=/cotizacion>Solicitar cotización</a></li>
+          </ul>
+        </div>
+
+        <div>
+          <h4 class=footer-title>Servicios</h4>
+          <ul class=footer-links>
+            <li><a href=/cotizacion?servicio=diseno-grafico>Diseño Gráfico</a></li>
+            <li><a href=/cotizacion?servicio=produccion-videos>Producción de Videos</a></li>
+            <li><a href=/cotizacion?servicio=spots-publicitarios>Spots Publicitarios</a></li>
+            <li><a href=/cotizacion?servicio=fotografia-profesional>Fotografía Profesional</a></li>
+            <li><a href=/cotizacion?servicio=contenido-especializado>Contenido Especializado</a></li>
+          </ul>
+        </div>
+
+        <div>
+          <h4 class=footer-title>Contacto</h4>
+          <ul class=footer-links>
+            <li class=footer-contact-item>Email: <a href=mailto:contacto@devioz.com id=footer-email style=color: inherit; text-decoration: none;>contacto@devioz.com</a></li>
+            <li class=footer-contact-item>Teléfono: <span id=footer-telefono>999 999 999</span></li>
+            <li class=footer-contact-item>Web: <a href=https://devioz.com/ target=_blank rel=noopener noreferrer id=footer-web style=color: inherit; text-decoration: none;>devioz.com</a></li>
+            <li class=footer-contact-item>Sede: <span id=footer-sede>Lima, Perú</span></li>
+            <li class=footer-contact-item id=footer-horario-row>Horario: <span id=footer-horario>Lun - Vie: 9:00 AM - 6:00 PM</span></li>
+          </ul>
+        </div>
+      </div>
+
+      <div class=footer-bottom>
+        <p>&copy; 2026 Devioz Creative Studio. Todos los derechos reservados.</p>
+        <p class=footer-privacy>Línea creativa oficial de <a href=https://devioz.com/ target=_blank rel=noopener noreferrer style=color: inherit;>Devioz</a>.</p>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Script Principal -->
+  <script src=/frontend/assets/js/main.js></script>
+</body>
+</html>

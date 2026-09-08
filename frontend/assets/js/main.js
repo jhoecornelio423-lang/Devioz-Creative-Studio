@@ -14,6 +14,8 @@ document.addEventListener('DOMContentLoaded', () => {
   loadConfig();
   initContactForm();
   initRealtimeSync();
+  initFaq();
+  initBlogFilter();
 });
 
 /**
@@ -29,7 +31,9 @@ function initActiveNav() {
       (path === '' && href === '/inicio') ||
       (path === '/frontend/index.html' && href === '/inicio') ||
       (path === '/frontend/portafolio.html' && href === '/portafolio') ||
-      (path === '/frontend/cotizacion.html' && href === '/cotizacion')
+      (path === '/frontend/cotizacion.html' && href === '/cotizacion') ||
+      (path === '/frontend/planes.html' && href === '/planes') ||
+      (path === '/frontend/blog.html' && href === '/blog')
     ) {
       link.classList.add('active');
     } else {
@@ -482,15 +486,29 @@ function initContactForm() {
   const submitBtn = document.getElementById('submit-form-btn');
   const serviceSelect = document.getElementById('servicio');
 
-  // Pre-seleccionar servicio si viene en el query parameter de la URL
+  // Pre-seleccionar servicio o plan si viene en el query parameter de la URL
+  const urlParams = new URLSearchParams(window.location.search);
   if (serviceSelect) {
-    const urlParams = new URLSearchParams(window.location.search);
     const serviceParam = urlParams.get('servicio');
     if (serviceParam) {
       const match = Array.from(serviceSelect.options).find(o => o.value === serviceParam);
       if (match) {
         serviceSelect.value = serviceParam;
       }
+    }
+  }
+
+  const planParam = urlParams.get('plan');
+  if (planParam) {
+    const planNames = {
+      'starter': 'Plan Starter (Identidad Esencial)',
+      'pro': 'Plan Pro Studio (Contenido & Crecimiento)',
+      'elite': 'Plan Elite (Escala Audiovisual & 360)'
+    };
+    const planTitle = planNames[planParam.toLowerCase()] || `Plan ${planParam}`;
+    const mensajeEl = document.getElementById('mensaje');
+    if (mensajeEl && !mensajeEl.value) {
+      mensajeEl.value = `Hola Devioz, me interesa cotizar el ${planTitle}. Me gustaría recibir información detallada de alcances, cronograma de entrega y presupuesto adaptado a mi marca.`;
     }
   }
 
@@ -642,4 +660,68 @@ function isValidPhone(phone) {
   if (!phone) return true;
   const digits = phone.replace(/\D/g, '');
   return digits.length === 9;
+}
+
+/**
+ * 7. FAQ Accordion Handler (Planes Page)
+ */
+function initFaq() {
+  const faqItems = document.querySelectorAll('.faq-item');
+  if (!faqItems.length) return;
+
+  faqItems.forEach(item => {
+    const questionBtn = item.querySelector('.faq-question');
+    if (!questionBtn) return;
+
+    questionBtn.addEventListener('click', () => {
+      const isActive = item.classList.contains('active');
+
+      // Colapsar los demás acordeones para mejor experiencia
+      faqItems.forEach(other => {
+        if (other !== item) {
+          other.classList.remove('active');
+          const ans = other.querySelector('.faq-answer');
+          if (ans) ans.style.maxHeight = null;
+        }
+      });
+
+      item.classList.toggle('active', !isActive);
+      const answer = item.querySelector('.faq-answer');
+      if (answer) {
+        if (!isActive) {
+          answer.style.maxHeight = answer.scrollHeight + 'px';
+        } else {
+          answer.style.maxHeight = null;
+        }
+      }
+    });
+  });
+}
+
+/**
+ * 8. Blog Filter by Category (Blog Page)
+ */
+function initBlogFilter() {
+  const filterBtns = document.querySelectorAll('.blog-filter-btn');
+  const blogCards = document.querySelectorAll('.blog-card');
+  if (!filterBtns.length || !blogCards.length) return;
+
+  filterBtns.forEach(btn => {
+    btn.addEventListener('click', () => {
+      filterBtns.forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+
+      const category = btn.getAttribute('data-category');
+      blogCards.forEach(card => {
+        const cardCat = card.getAttribute('data-category');
+        if (category === 'all' || cardCat === category) {
+          card.style.display = '';
+          card.style.opacity = '1';
+        } else {
+          card.style.display = 'none';
+          card.style.opacity = '0';
+        }
+      });
+    });
+  });
 }

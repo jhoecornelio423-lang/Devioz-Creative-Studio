@@ -37,6 +37,18 @@ if ($path === 'cotizacion') {
     exit;
 }
 
+if ($path === 'planes') {
+    header('Content-Type: text/html; charset=UTF-8');
+    readfile(__DIR__ . '/frontend/planes.html');
+    exit;
+}
+
+if ($path === 'blog') {
+    header('Content-Type: text/html; charset=UTF-8');
+    readfile(__DIR__ . '/frontend/blog.html');
+    exit;
+}
+
 // Soporte para assets solicitados directamente como /assets/...
 if (str_starts_with($path, 'assets/')) {
     $filePath = __DIR__ . '/frontend/' . $path;
