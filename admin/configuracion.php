@@ -11,7 +11,7 @@ require_once __DIR__ . '/../backend/config/database.php';
 require_once __DIR__ . '/../backend/helpers/validation.php';
 
 $pdo = getPDOConnection();
-$pageTitle = 'Configuración General';
+$pageTitle = 'Configuración del Footer';
 
 // PROCESAR GUARDADO DE CONFIGURACIÓN CON PATRÓN PRG
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
@@ -30,24 +30,50 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     $errors = [];
 
+    // 1. Nombre del proyecto
     if (empty($nombreProyecto)) {
         $errors[] = 'El nombre de la empresa / proyecto es obligatorio.';
+    } elseif (mb_strlen($nombreProyecto) < 3) {
+        $errors[] = 'El nombre del proyecto debe tener al menos 3 caracteres.';
     } elseif (!validateMaxLength($nombreProyecto, 100)) {
         $errors[] = 'El nombre del proyecto no debe superar los 100 caracteres.';
     }
 
+    // 2. Correo electrónico oficial
     if (empty($emailContacto)) {
         $errors[] = 'El correo electrónico de contacto es obligatorio.';
     } elseif (!filter_var($emailContacto, FILTER_VALIDATE_EMAIL)) {
-        $errors[] = 'El correo electrónico ingresado no tiene un formato válido.';
+        $errors[] = 'El correo electrónico ingresado no tiene un formato válido (ej. contacto@devioz.com).';
     }
 
-    if (!empty($telefonoContacto) && !preg_match('/^[0-9\+\-\s\(\)]{7,30}$/', $telefonoContacto)) {
-        $errors[] = 'El teléfono o WhatsApp contiene un formato no válido.';
+    // 3. Teléfono / WhatsApp (estrictamente solo números, máximo y exactamente 9 dígitos)
+    if (!empty($telefonoContacto)) {
+        $cleanTelefono = preg_replace('/\D/', '', $telefonoContacto);
+        if (strlen($cleanTelefono) !== 9) {
+            $errors[] = 'El teléfono o WhatsApp debe contener exactamente 9 dígitos numéricos (ej. 987654321).';
+        } else {
+            $telefonoContacto = $cleanTelefono;
+        }
     }
 
-    if (!empty($webOficial) && !filter_var($webOficial, FILTER_VALIDATE_URL)) {
-        $errors[] = 'La URL de la web oficial debe tener un formato válido con protocolo (ej. https://devioz.com/).';
+    // 4. Sitio web oficial (URL)
+    if (!empty($webOficial)) {
+        if (!preg_match('/^https?:\/\//i', $webOficial)) {
+            $webOficial = 'https://' . $webOficial;
+        }
+        if (!filter_var($webOficial, FILTER_VALIDATE_URL)) {
+            $errors[] = 'La URL de la web oficial debe tener un formato válido (ej. https://devioz.com/).';
+        }
+    }
+
+    // 5. Sede principal
+    if (!empty($sedePrincipal) && mb_strlen($sedePrincipal) > 100) {
+        $errors[] = 'La sede principal no debe superar los 100 caracteres.';
+    }
+
+    // 6. Horario de atención
+    if (!empty($horarioAtencion) && mb_strlen($horarioAtencion) > 100) {
+        $errors[] = 'El horario de atención no debe superar los 100 caracteres.';
     }
 
     if (!empty($errors)) {
@@ -117,9 +143,9 @@ require_once __DIR__ . '/includes/header.php';
 
 <div class="page-title-box">
   <div>
-    <h1 class="page-title">⚙️ Configuración del Sistema</h1>
+    <h1 class="page-title">⚙️ Configuración del Footer</h1>
     <p style="color: var(--devioz-gray); font-size: 0.9rem; margin-top: 0.25rem;">
-      Administra los parámetros de la empresa, datos de contacto oficiales y presencia digital.
+      Administra los parámetros de la empresa, datos de contacto oficiales y enlaces que se reflejan en el pie de página (footer) de la web pública.
     </p>
   </div>
 </div>
@@ -137,7 +163,7 @@ require_once __DIR__ . '/includes/header.php';
 <?php endif; ?>
 
 <div class="admin-card">
-  <form action="configuracion.php" method="POST">
+  <form action="configuracion.php" method="POST" id="configFooterForm" novalidate>
     <?php csrfField(); ?>
 
     <div class="form-grid">
@@ -145,7 +171,7 @@ require_once __DIR__ . '/includes/header.php';
       <div class="form-group-admin">
         <label for="nombre_proyecto">Nombre del Proyecto / Estudio *</label>
         <input type="text" id="nombre_proyecto" name="nombre_proyecto" class="form-control-admin" 
-               value="<?php echo htmlspecialchars($valNombre); ?>" required maxlength="100">
+               value="<?php echo htmlspecialchars($valNombre); ?>" required minlength="3" maxlength="100">
         <small style="color: var(--devioz-gray); font-size: 0.8rem;">Nombre mostrado en encabezados, pie de página y metadatos.</small>
       </div>
 
@@ -153,16 +179,16 @@ require_once __DIR__ . '/includes/header.php';
       <div class="form-group-admin">
         <label for="email_contacto">Correo Electrónico Oficial *</label>
         <input type="email" id="email_contacto" name="email_contacto" class="form-control-admin" 
-               value="<?php echo htmlspecialchars($valEmail); ?>" required maxlength="150">
+               value="<?php echo htmlspecialchars($valEmail); ?>" required maxlength="150" placeholder="contacto@devioz.com">
         <small style="color: var(--devioz-gray); font-size: 0.8rem;">Bandeja principal para recepción de cotizaciones y dudas.</small>
       </div>
 
       <!-- Teléfono / WhatsApp -->
       <div class="form-group-admin">
         <label for="telefono_contacto">Teléfono / WhatsApp de Contacto</label>
-        <input type="text" id="telefono_contacto" name="telefono_contacto" class="form-control-admin" 
-               value="<?php echo htmlspecialchars($valTelefono); ?>" placeholder="Ej: 999 999 999 o +51 999 999 999" maxlength="30">
-        <small style="color: var(--devioz-gray); font-size: 0.8rem;">Número mostrado al público para contacto directo.</small>
+        <input type="tel" id="telefono_contacto" name="telefono_contacto" class="form-control-admin" 
+               value="<?php echo htmlspecialchars($valTelefono); ?>" placeholder="987654321" maxlength="9" pattern="[0-9]{9}" inputmode="numeric" autocomplete="tel">
+        <small style="color: var(--devioz-gray); font-size: 0.8rem;">Exactamente 9 dígitos numéricos, sin letras ni caracteres especiales (ej. 987654321).</small>
       </div>
 
       <!-- Sede Principal -->

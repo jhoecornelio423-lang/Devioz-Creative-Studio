@@ -28,6 +28,31 @@ document.addEventListener('DOMContentLoaded', () => {
     setTimeout(notifyFrontendSync, 200);
   }
 
+  // Validación estricta y restricción en tiempo real a 9 dígitos para el teléfono de configuración
+  const configTelInput = document.getElementById('telefono_contacto');
+  const configForm = document.getElementById('configFooterForm') || document.querySelector('form[action="configuracion.php"]');
+
+  if (configTelInput) {
+    configTelInput.setAttribute('maxlength', '9');
+    configTelInput.setAttribute('inputmode', 'numeric');
+    configTelInput.addEventListener('input', (e) => {
+      // Filtrar letras y caracteres no numéricos, restringir estrictamente a 9 dígitos
+      e.target.value = e.target.value.replace(/\D/g, '').slice(0, 9);
+    });
+  }
+
+  if (configForm && configTelInput) {
+    configForm.addEventListener('submit', (e) => {
+      const cleanTel = configTelInput.value.replace(/\D/g, '');
+      if (cleanTel.length > 0 && cleanTel.length !== 9) {
+        e.preventDefault();
+        alert('El número de teléfono o WhatsApp debe contener exactamente 9 dígitos numéricos (ej. 987654321).');
+        configTelInput.focus();
+        return false;
+      }
+    });
+  }
+
   // Interceptar botones y formularios de acciones en línea para ejecutarlos vía AJAX (CERO F5)
   bindAjaxActionForms();
 

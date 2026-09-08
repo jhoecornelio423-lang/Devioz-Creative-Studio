@@ -40,7 +40,7 @@ $currentPage = basename($_SERVER['PHP_SELF']);
     </li>
     <li>
       <a href="configuracion.php" class="<?php echo $currentPage === 'configuracion.php' ? 'active' : ''; ?>">
-        ⚙️ Configuración
+        ⚙️ Configuración del Footer
       </a>
     </li>
     <li style="margin-top: 1.5rem; border-top: 1px solid var(--devioz-border); padding-top: 1rem;">
