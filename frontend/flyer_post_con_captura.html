@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Devioz Creative Studio - Flyer con Captura Real</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { background: #000; margin: 0; padding: 0; overflow: hidden; width: 896px; height: 1200px; font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; }
+    .flyer-wrapper { width: 896px; height: 1200px; position: relative; overflow: hidden; }
+    .flyer-bg { width: 100%; height: 100%; object-fit: cover; display: block; }
+    .inset-ui-card {
+      position: absolute;
+      bottom: 40px;
+      left: 40px;
+      width: 375px;
+      background: rgba(3, 14, 14, 0.92);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1.5px solid rgba(0, 194, 194, 0.55);
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: 0 25px 60px rgba(0, 0, 0, 0.9), 0 0 30px rgba(0, 194, 194, 0.25);
+      z-index: 10;
+    }
+    .inset-header {
+      background: #081a1a;
+      padding: 9px 14px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid rgba(0, 194, 194, 0.25);
+    }
+    .window-dots { display: flex; gap: 6px; }
+    .dot { width: 9px; height: 9px; border-radius: 50%; }
+    .dot-red { background: #ef4444; }
+    .dot-yellow { background: #f59e0b; }
+    .dot-green { background: #10b981; }
+    .window-title { font-size: 11px; font-weight: 600; color: #2dd4bf; font-family: monospace; }
+    .inset-body { padding: 6px; background: #020a0a; }
+    .inset-body img {
+      width: 100%;
+      height: 195px;
+      object-fit: cover;
+      object-position: top left;
+      border-radius: 6px;
+      display: block;
+      border: 1px solid rgba(255, 255, 255, 0.06);
+    }
+    .inset-footer {
+      padding: 9px 14px;
+      background: #081a1a;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-size: 11px;
+      color: #cbd5e1;
+      font-weight: 500;
+      border-top: 1px solid rgba(0, 194, 194, 0.15);
+    }
+    .status-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      color: #34d399;
+      font-weight: 700;
+      font-size: 10px;
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+    }
+    .pulse-circle {
+      width: 7px;
+      height: 7px;
+      background: #10b981;
+      border-radius: 50%;
+      box-shadow: 0 0 8px #10b981;
+    }
+  </style>
+</head>
+<body>
+  <div class="flyer-wrapper">
+    <img src="assets/img/flyer-devioz-postproduccion.jpg" alt="Devioz Postproducción" class="flyer-bg">
+    <div class="inset-ui-card">
+      <div class="inset-header">
+        <div class="window-dots">
+          <span class="dot dot-red"></span>
+          <span class="dot dot-yellow"></span>
+          <span class="dot dot-green"></span>
+        </div>
+        <span class="window-title">admin.devioz.com/dashboard</span>
+      </div>
+      <div class="inset-body">
+        <img src="assets/img/screenshot_admin_dashboard.png" alt="Dashboard del Sistema">
+      </div>
+      <div class="inset-footer">
+        <span>Panel Administrativo en Vivo</span>
+        <span class="status-badge"><span class="pulse-circle"></span> Conectado</span>
+      </div>
+    </div>
+  </div>
+</body>
+</html>
