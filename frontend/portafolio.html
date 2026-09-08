@@ -1,0 +1,213 @@
+﻿<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Portafolio Creativo - Devioz Creative Studio</title>
+
+  <!-- SEO Meta Tags -->
+  <meta name="description" content="Explora nuestro portafolio de proyectos creativos: diseño gráfico, producción audiovisual, spots publicitarios y branding por Devioz Creative Studio.">
+  <meta name="author" content="Devioz Creative Studio">
+  
+  <!-- Favicon -->
+  <link rel="icon" type="image/png" href="/frontend/assets/img/logo-devioz.png">
+  <link rel="shortcut icon" type="image/png" href="/frontend/assets/img/logo-devioz.png">
+  <link rel="apple-touch-icon" href="/frontend/assets/img/logo-devioz.png">
+
+  <!-- Stylesheets -->
+  <link rel="stylesheet" href="/frontend/assets/css/style.css">
+</head>
+<body>
+
+  <!-- HEADER / NAVEGACIÓN -->
+  <header class="header" id="header">
+    <div class="container nav-container">
+      <a href="/inicio" class="logo" id="main-logo" aria-label="Devioz Creative Studio Inicio">
+        <img src="/frontend/assets/img/logo-devioz.png" alt="Devioz Logo" class="logo-img">
+        <span class="logo-badge">Creative Studio</span>
+      </a>
+
+      <nav class="nav-menu" id="nav-menu">
+        <a href="/inicio" class="nav-link">Inicio</a>
+        <a href="/portafolio" class="nav-link active">Portafolio</a>
+      </nav>
+
+      <div class="nav-cta">
+        <a href="/cotizacion" class="btn btn-primary" id="header-cta-btn">Solicitar cotización</a>
+      </div>
+
+      <button class="mobile-toggle" id="mobile-toggle" aria-label="Abrir menú de navegación" aria-expanded="false">
+        &#9776;
+      </button>
+    </div>
+  </header>
+
+  <main>
+    <!-- CABECERA DE PÁGINA PORTAFOLIO -->
+    <section class="page-header-section">
+      <div class="hero-glow"></div>
+      <div class="container">
+        <div class="section-header">
+          <span class="section-tag">Trabajos Recientes</span>
+          <h1 class="section-title">Portafolio <span>Creativo</span></h1>
+          <p class="section-subtitle">Explora una selección de nuestros proyectos de diseño, producción y contenido visual.</p>
+        </div>
+
+        <!-- Filtros de Categorías -->
+        <div class="portfolio-filters">
+          <button class="filter-btn active" data-filter="todos">Todos</button>
+          <button class="filter-btn" data-filter="diseno-grafico">Diseño Gráfico</button>
+          <button class="filter-btn" data-filter="video">Video</button>
+          <button class="filter-btn" data-filter="spots">Spots</button>
+          <button class="filter-btn" data-filter="fotografia">Fotografía</button>
+          <button class="filter-btn" data-filter="branding">Branding</button>
+        </div>
+
+        <!-- Grilla de Proyectos -->
+        <div class="portfolio-grid">
+          <!-- Proyecto 1 -->
+          <article class="portfolio-item" data-category="diseno-grafico" id="project-card-1">
+            <div class="portfolio-img-wrapper">
+              <img src="/frontend/assets/img/portfolio/project-1.svg" alt="Campaña visual para redes sociales" width="800" height="500" loading="lazy" onerror="this.onerror=null; this.src='/frontend/assets/img/portfolio/project-1.svg';">
+              <span class="portfolio-badge">Diseño Gráfico</span>
+            </div>
+            <div class="portfolio-info">
+              <h3 class="portfolio-title">Campaña visual para redes sociales</h3>
+              <p class="portfolio-description">Diseño estratégico de piezas gráficas y carruseles publicitarios para redes digitales.</p>
+            </div>
+          </article>
+
+          <!-- Proyecto 2 -->
+          <article class="portfolio-item" data-category="spots" id="project-card-2">
+            <div class="portfolio-img-wrapper">
+              <img src="/frontend/assets/img/portfolio/project-2.svg" alt="Spot promocional de lanzamiento" width="800" height="500" loading="lazy" onerror="this.onerror=null; this.src='/frontend/assets/img/portfolio/project-1.svg';">
+              <span class="portfolio-badge">Spots</span>
+            </div>
+            <div class="portfolio-info">
+              <h3 class="portfolio-title">Spot promocional de lanzamiento</h3>
+              <p class="portfolio-description">Anuncio corto y dinámico para campaña de lanzamiento de producto tecnológico.</p>
+            </div>
+          </article>
+
+          <!-- Proyecto 3 -->
+          <article class="portfolio-item" data-category="fotografia" id="project-card-3">
+            <div class="portfolio-img-wrapper">
+              <img src="/frontend/assets/img/portfolio/project-3.svg" alt="Fotografía corporativa de equipo" width="800" height="500" loading="lazy" onerror="this.onerror=null; this.src='/frontend/assets/img/portfolio/project-1.svg';">
+              <span class="portfolio-badge">Fotografía</span>
+            </div>
+            <div class="portfolio-info">
+              <h3 class="portfolio-title">Fotografía corporativa de equipo</h3>
+              <p class="portfolio-description">Sesión de fotos ejecutiva para sitio web y perfiles corporativos institucionales.</p>
+            </div>
+          </article>
+
+          <!-- Proyecto 4 -->
+          <article class="portfolio-item" data-category="branding" id="project-card-4">
+            <div class="portfolio-img-wrapper">
+              <img src="/frontend/assets/img/portfolio/project-4.svg" alt="Branding para marca emergente" width="800" height="500" loading="lazy" onerror="this.onerror=null; this.src='/frontend/assets/img/portfolio/project-1.svg';">
+              <span class="portfolio-badge">Branding</span>
+            </div>
+            <div class="portfolio-info">
+              <h3 class="portfolio-title">Branding para marca emergente</h3>
+              <p class="portfolio-description">Construcción de identidad de marca, paleta de colores y manual de aplicación gráfica.</p>
+            </div>
+          </article>
+
+          <!-- Proyecto 5 -->
+          <article class="portfolio-item" data-category="video" id="project-card-5">
+            <div class="portfolio-img-wrapper">
+              <img src="/frontend/assets/img/portfolio/project-5.svg" alt="Video institucional empresarial" width="800" height="500" loading="lazy" onerror="this.onerror=null; this.src='/frontend/assets/img/portfolio/project-1.svg';">
+              <span class="portfolio-badge">Video</span>
+            </div>
+            <div class="portfolio-info">
+              <h3 class="portfolio-title">Video institucional empresarial</h3>
+              <p class="portfolio-description">Producción audiovisual de alto nivel proyectando los valores y alcance de la empresa.</p>
+            </div>
+          </article>
+
+          <!-- Proyecto 6 -->
+          <article class="portfolio-item" data-category="diseno-grafico" id="project-card-6">
+            <div class="portfolio-img-wrapper">
+              <img src="/frontend/assets/img/portfolio/project-6.svg" alt="Piezas gráficas para campaña digital" width="800" height="500" loading="lazy" onerror="this.onerror=null; this.src='/frontend/assets/img/portfolio/project-1.svg';">
+              <span class="portfolio-badge">Diseño Gráfico</span>
+            </div>
+            <div class="portfolio-info">
+              <h3 class="portfolio-title">Piezas gráficas para campaña digital</h3>
+              <p class="portfolio-description">Banners animados y creatividades optimizadas para pauta publicitaria digital.</p>
+            </div>
+          </article>
+        </div>
+
+        <!-- CTA INVITACIÓN A COTIZAR -->
+        <div class="page-cta-banner">
+          <div class="page-cta-content">
+            <span class="section-tag">¿Inspirado por nuestros proyectos?</span>
+            <h2 class="page-cta-title">Hagamos realidad la visión de tu marca</h2>
+            <p class="page-cta-subtitle">Creamos piezas que conectan, venden y diferencian tu negocio de la competencia.</p>
+          </div>
+          <a href="/cotizacion" class="btn btn-primary page-cta-btn">Solicitar cotización &rarr;</a>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- FOOTER -->
+  <footer class="footer">
+    <div class="container">
+      <div class="footer-grid">
+        <div class="footer-about">
+          <a href="/inicio" class="logo">
+            <img src="/frontend/assets/img/logo-devioz.png" alt="Devioz Logo" class="logo-img" style="height: 32px;">
+            <span class="logo-badge">Creative Studio</span>
+          </a>
+          <p>
+            Devioz Creative Studio, una extensión creativa de Devioz para diseño, video y contenido visual profesional.
+          </p>
+          <a href="https://devioz.com/" target="_blank" rel="noopener noreferrer" class="footer-external" id="footer-external-link">
+            Visitar Devioz Oficial (devioz.com) &rarr;
+          </a>
+        </div>
+
+        <div>
+          <h4 class="footer-title">Navegación</h4>
+          <ul class="footer-links">
+            <li><a href="/inicio">Inicio</a></li>
+            <li><a href="/portafolio">Portafolio</a></li>
+            <li><a href="/cotizacion">Solicitar cotización</a></li>
+          </ul>
+        </div>
+
+        <div>
+          <h4 class="footer-title">Servicios</h4>
+          <ul class="footer-links">
+            <li><a href="/cotizacion?servicio=diseno-grafico">Diseño Gráfico</a></li>
+            <li><a href="/cotizacion?servicio=produccion-videos">Producción de Videos</a></li>
+            <li><a href="/cotizacion?servicio=spots-publicitarios">Spots Publicitarios</a></li>
+            <li><a href="/cotizacion?servicio=fotografia-profesional">Fotografía Profesional</a></li>
+            <li><a href="/cotizacion?servicio=contenido-especializado">Contenido Especializado</a></li>
+          </ul>
+        </div>
+
+        <div>
+          <h4 class="footer-title">Contacto</h4>
+          <ul class="footer-links">
+            <li class="footer-contact-item">Email: <a href="mailto:contacto@devioz.com" id="footer-email" style="color: inherit; text-decoration: none;">contacto@devioz.com</a></li>
+            <li class="footer-contact-item">Teléfono: <span id="footer-telefono">999 999 999</span></li>
+            <li class="footer-contact-item">Web: <a href="https://devioz.com/" target="_blank" rel="noopener noreferrer" id="footer-web" style="color: inherit; text-decoration: none;">devioz.com</a></li>
+            <li class="footer-contact-item">Sede: <span id="footer-sede">Lima, Perú</span></li>
+            <li class="footer-contact-item" id="footer-horario-row">Horario: <span id="footer-horario">Lun - Vie: 9:00 AM - 6:00 PM</span></li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="footer-bottom">
+        <p>&copy; 2026 Devioz Creative Studio. Todos los derechos reservados.</p>
+        <p>Alineado a la Identidad Visual Oficial de Devioz</p>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Scripts -->
+  <script src="/frontend/assets/js/main.js"></script>
+</body>
+</html>

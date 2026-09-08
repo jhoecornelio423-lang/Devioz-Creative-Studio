@@ -1129,169 +1129,122 @@ textarea.form-control {
 }
 
 /* ==========================================================================
-   MODALES Y DIÁLOGOS NATIVOS (<dialog>) PARA PORTAFOLIO Y COTIZACIÓN
+   PÁGINAS INDEPENDIENTES (PORTAFOLIO & COTIZACIÓN)
    ========================================================================== */
-body.modal-open {
-  overflow: hidden;
-}
-
-button.nav-link {
-  background: none;
-  border: none;
-  font-family: inherit;
-  font-size: 1rem;
-  font-weight: 500;
-  color: var(--devioz-gray);
-  cursor: pointer;
-  padding: 0.5rem 0.25rem;
-  transition: color 0.2s ease;
-}
-
-button.nav-link:hover,
-button.nav-link.active {
-  color: var(--devioz-primary);
-}
-
-.devioz-modal {
-  border: 1px solid rgba(0, 194, 194, 0.4);
-  border-radius: var(--radius-md, 16px);
-  background: rgba(2, 14, 14, 0.98);
-  color: var(--devioz-white);
-  box-shadow: 0 30px 90px rgba(0, 0, 0, 0.95), 0 0 45px rgba(0, 194, 194, 0.2);
-  padding: 0;
-  max-width: 780px;
-  width: 92%;
-  max-height: 90vh;
-  margin: auto;
-  opacity: 0;
-  transform: scale(0.96) translateY(20px);
-  transition: opacity 0.25s ease, transform 0.25s ease, display 0.25s ease allow-discrete;
-  outline: none;
-  position: fixed;
-  inset: 0;
-  z-index: 1000;
-  overflow: hidden;
-}
-
-.devioz-modal[open] {
-  opacity: 1;
-  transform: scale(1) translateY(0);
-}
-
-@starting-style {
-  .devioz-modal[open] {
-    opacity: 0;
-    transform: scale(0.96) translateY(20px);
-  }
-}
-
-.devioz-modal::backdrop {
-  background: rgba(1, 10, 10, 0.85);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
-  opacity: 0;
-  transition: opacity 0.25s ease, display 0.25s ease allow-discrete;
-}
-
-.devioz-modal[open]::backdrop {
-  opacity: 1;
-}
-
-@starting-style {
-  .devioz-modal[open]::backdrop {
-    opacity: 0;
-  }
-}
-
-.devioz-modal.modal-portafolio {
-  max-width: 1200px;
-  width: 95%;
-}
-
-.modal-cotizacion .contact-wrapper {
-  background: transparent;
-  border: none;
-  padding: 0;
-  box-shadow: none;
-  max-width: 100%;
-}
-
-.modal-content-inner {
-  padding: 2.5rem;
-  overflow-y: auto;
-  max-height: calc(90vh - 2px);
-}
-
-.modal-content-inner::-webkit-scrollbar {
-  width: 8px;
-}
-
-.modal-content-inner::-webkit-scrollbar-track {
-  background: rgba(0, 0, 0, 0.4);
-}
-
-.modal-content-inner::-webkit-scrollbar-thumb {
-  background: rgba(0, 194, 194, 0.4);
-  border-radius: 4px;
-}
-
-.modal-header {
+.page-header-section {
+  padding-top: 9.5rem;
+  padding-bottom: 5rem;
+  min-height: 80vh;
   position: relative;
-  margin-bottom: 2rem;
-  padding-right: 3.5rem;
+  overflow: hidden;
 }
 
-.modal-header .section-tag {
-  margin-bottom: 0.5rem;
+.page-header-section .section-header {
+  margin-bottom: 2.5rem;
 }
 
-.modal-header .section-title {
-  margin-bottom: 0.5rem;
-}
-
-.modal-close-btn {
-  position: absolute;
-  top: 0;
-  right: 0;
-  width: 44px;
-  height: 44px;
-  border-radius: 50%;
-  background: rgba(255, 255, 255, 0.05);
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  color: var(--devioz-gray);
-  font-size: 1.6rem;
-  line-height: 1;
+/* Banner de CTA al final de páginas */
+.page-cta-banner {
+  margin-top: 4rem;
+  background: linear-gradient(135deg, rgba(0, 26, 26, 0.95), rgba(0, 45, 45, 0.7));
+  border: 1px solid rgba(0, 194, 194, 0.35);
+  border-radius: var(--radius-lg, 18px);
+  padding: 3rem 2.5rem;
   display: flex;
   align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  z-index: 10;
+  justify-content: space-between;
+  gap: 2rem;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.6), 0 0 30px rgba(0, 194, 194, 0.1);
 }
 
-.modal-close-btn:hover,
-.modal-close-btn:focus-visible {
-  background: rgba(239, 68, 68, 0.2);
-  border-color: rgba(239, 68, 68, 0.5);
-  color: #ef4444;
-  transform: scale(1.08);
+.page-cta-content {
+  max-width: 650px;
 }
 
-@media (max-width: 768px) {
-  .devioz-modal {
-    width: 96%;
-    max-height: 94vh;
+.page-cta-title {
+  font-family: var(--font-heading);
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: var(--devioz-white);
+  margin-top: 0.4rem;
+  margin-bottom: 0.5rem;
+}
+
+.page-cta-subtitle {
+  color: var(--devioz-gray);
+  font-size: 1rem;
+  line-height: 1.5;
+}
+
+.page-cta-btn {
+  flex-shrink: 0;
+  padding: 1rem 2rem;
+  font-size: 1.05rem;
+}
+
+/* Tarjetas de contacto directo en página de cotización */
+.direct-contact-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1.5rem;
+  margin-top: 3.5rem;
+  max-width: 1000px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.direct-contact-card {
+  background: var(--devioz-dark-secondary);
+  border: 1px solid var(--devioz-border-dark);
+  border-radius: var(--radius-md);
+  padding: 1.8rem 1.25rem;
+  text-align: center;
+  transition: var(--transition-normal);
+}
+
+.direct-contact-card:hover {
+  transform: translateY(-4px);
+  border-color: rgba(0, 194, 194, 0.4);
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.4), 0 0 15px rgba(0, 194, 194, 0.1);
+}
+
+.contact-card-icon {
+  font-size: 1.8rem;
+  color: var(--devioz-primary);
+  margin-bottom: 0.75rem;
+}
+
+.contact-card-title {
+  font-family: var(--font-heading);
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--devioz-white);
+  margin-bottom: 0.35rem;
+}
+
+.contact-card-text {
+  font-size: 0.875rem;
+  color: var(--devioz-gray);
+  word-break: break-word;
+}
+
+@media (max-width: 992px) {
+  .direct-contact-grid {
+    grid-template-columns: repeat(2, 1fr);
   }
-  .modal-content-inner {
-    padding: 1.5rem;
+  .page-cta-banner {
+    flex-direction: column;
+    text-align: center;
   }
-  .modal-header {
-    padding-right: 2.5rem;
+}
+
+@media (max-width: 576px) {
+  .direct-contact-grid {
+    grid-template-columns: 1fr;
   }
-  .modal-close-btn {
-    width: 36px;
-    height: 36px;
-    font-size: 1.3rem;
+  .page-header-section {
+    padding-top: 7.5rem;
+    padding-bottom: 3.5rem;
   }
 }
 

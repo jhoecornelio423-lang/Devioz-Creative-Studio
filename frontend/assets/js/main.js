@@ -8,14 +8,44 @@ document.addEventListener('DOMContentLoaded', () => {
   // Init all modules
   initHeaderScroll();
   initMobileMenu();
-  initModalSystem();
+  initActiveNav();
   loadPortfolio();
   loadServices();
   loadConfig();
   initContactForm();
-  initScrollspy();
   initRealtimeSync();
 });
+
+/**
+ * Activa la clase 'active' en el enlace de navegación correspondiente a la ruta actual
+ */
+function initActiveNav() {
+  const path = window.location.pathname.replace(/\/$/, '') || '/inicio';
+  const navLinks = document.querySelectorAll('.nav-link');
+  navLinks.forEach(link => {
+    const href = link.getAttribute('href');
+    if (
+      href === path ||
+      (path === '' && href === '/inicio') ||
+      (path === '/frontend/index.html' && href === '/inicio') ||
+      (path === '/frontend/portafolio.html' && href === '/portafolio') ||
+      (path === '/frontend/cotizacion.html' && href === '/cotizacion')
+    ) {
+      link.classList.add('active');
+    } else {
+      link.classList.remove('active');
+    }
+  });
+
+  const ctaBtn = document.getElementById('header-cta-btn');
+  if (ctaBtn) {
+    if (path === '/cotizacion' || path === '/frontend/cotizacion.html') {
+      ctaBtn.classList.add('active');
+    } else {
+      ctaBtn.classList.remove('active');
+    }
+  }
+}
 
 /**
  * Helper: Escape HTML to prevent XSS
@@ -125,8 +155,8 @@ async function loadPortfolio() {
     const ts = Date.now();
     // Fetch categories and projects in parallel sin caché para sincronización en tiempo real
     const [catRes, projRes] = await Promise.all([
-      fetch(`../backend/api/categories.php?_t=${ts}`, { cache: 'no-store' }).catch(() => null),
-      fetch(`../backend/api/portfolio.php?_t=${ts}`, { cache: 'no-store' }).catch(() => null)
+      fetch(`/backend/api/categories.php?_t=${ts}`, { cache: 'no-store' }).catch(() => null),
+      fetch(`/backend/api/portfolio.php?_t=${ts}`, { cache: 'no-store' }).catch(() => null)
     ]);
 
     if (!projRes || !projRes.ok) {
@@ -188,12 +218,12 @@ async function loadPortfolio() {
     } else {
       let gridHtml = '';
       projects.forEach(p => {
-        const imgUrl = p.imagen ? escapeHtml(p.imagen) : 'assets/img/portfolio/project-1.svg';
+        const imgUrl = p.imagen ? escapeHtml(p.imagen) : '/frontend/assets/img/portfolio/project-1.svg';
         const isHidden = (selectedFilter !== 'todos' && p.categoria_slug !== selectedFilter);
         gridHtml += `
           <article class="portfolio-item ${isHidden ? 'hidden' : ''}" data-category="${escapeHtml(p.categoria_slug)}" id="project-card-${p.id}">
             <div class="portfolio-img-wrapper">
-              <img src="${imgUrl}" alt="${escapeHtml(p.titulo)}" width="800" height="500" loading="lazy" onerror="this.onerror=null; this.src='assets/img/portfolio/project-1.svg';">
+              <img src="${imgUrl}" alt="${escapeHtml(p.titulo)}" width="800" height="500" loading="lazy" onerror="this.onerror=null; this.src='/frontend/assets/img/portfolio/project-1.svg';">
               <span class="portfolio-badge">${escapeHtml(p.categoria_nombre)}</span>
             </div>
             <div class="portfolio-info">
@@ -226,7 +256,7 @@ async function loadServices() {
 
   try {
     const ts = Date.now();
-    const res = await fetch(`../backend/api/services.php?_t=${ts}`, { cache: 'no-store' });
+    const res = await fetch(`/backend/api/services.php?_t=${ts}`, { cache: 'no-store' });
     if (!res.ok) return;
 
     const result = await res.json();
@@ -296,9 +326,9 @@ async function loadServices() {
           <h3 class="service-title">${escapeHtml(s.titulo)}</h3>
           <p class="service-description">${escapeHtml(s.descripcion)}</p>
           ${benefitsList ? `<ul class="service-benefits">${benefitsList}</ul>` : ''}
-          <button type="button" class="service-action" data-open-modal="modal-cotizacion" data-service-slug="${escapeHtml(s.slug)}">
+          <a href="/cotizacion?servicio=${encodeURIComponent(s.slug)}" class="service-action">
             Quiero este servicio &rarr;
-          </button>
+          </a>
         </article>
       `;
     });
@@ -308,14 +338,21 @@ async function loadServices() {
     // Sincronizar dinámicamente opciones en el selector de contacto
     if (serviceSelect) {
       const currentVal = serviceSelect.value;
+      const urlParams = new URLSearchParams(window.location.search);
+      const queryParamService = urlParams.get('servicio');
+
       let selectHtml = '<option value="" disabled>Selecciona un servicio *</option>';
       services.forEach(s => {
-        const isSel = (s.slug === currentVal) ? 'selected' : '';
-        selectHtml += `<option value="${escapeHtml(s.slug)}" ${isSel}>${escapeHtml(s.titulo)}</option>`;
+        selectHtml += `<option value="${escapeHtml(s.slug)}">${escapeHtml(s.titulo)}</option>`;
       });
-      selectHtml += `<option value="otro" ${currentVal === 'otro' ? 'selected' : ''}>Otro requerimiento</option>`;
+      selectHtml += `<option value="otro">Otro requerimiento</option>`;
       serviceSelect.innerHTML = selectHtml;
-      if (!currentVal) {
+
+      if (queryParamService && services.some(s => s.slug === queryParamService)) {
+        serviceSelect.value = queryParamService;
+      } else if (currentVal && services.some(s => s.slug === currentVal)) {
+        serviceSelect.value = currentVal;
+      } else {
         serviceSelect.selectedIndex = 0;
       }
     }
@@ -331,7 +368,7 @@ async function loadServices() {
 async function loadConfig() {
   try {
     const ts = Date.now();
-    const res = await fetch(`../backend/api/config.php?_t=${ts}`, { cache: 'no-store' });
+    const res = await fetch(`/backend/api/config.php?_t=${ts}`, { cache: 'no-store' });
     if (!res.ok) return;
 
     const result = await res.json();
@@ -439,8 +476,23 @@ function initRealtimeSync() {
  */
 function initContactForm() {
   const contactForm = document.getElementById('contactForm');
+  if (!contactForm) return;
+
   const formFeedback = document.getElementById('formFeedback');
   const submitBtn = document.getElementById('submit-form-btn');
+  const serviceSelect = document.getElementById('servicio');
+
+  // Pre-seleccionar servicio si viene en el query parameter de la URL
+  if (serviceSelect) {
+    const urlParams = new URLSearchParams(window.location.search);
+    const serviceParam = urlParams.get('servicio');
+    if (serviceParam) {
+      const match = Array.from(serviceSelect.options).find(o => o.value === serviceParam);
+      if (match) {
+        serviceSelect.value = serviceParam;
+      }
+    }
+  }
 
   const telInput = document.getElementById('telefono');
   if (telInput) {
@@ -455,35 +507,34 @@ function initContactForm() {
     e.preventDefault();
 
     // Reset feedback state
-    formFeedback.className = 'form-feedback';
-    formFeedback.style.display = 'none';
-    formFeedback.innerHTML = '';
+    if (formFeedback) {
+      formFeedback.className = 'form-feedback';
+      formFeedback.style.display = 'none';
+      formFeedback.innerHTML = '';
+    }
 
     // Form Field Values
     const nombre = document.getElementById('nombre')?.value.trim();
-    const empresa = document.getElementById('empresa')?.value.trim() || '';
+    const empresa = document.getElementById('empresa')?.value.trim() || 'No especificada';
     const email = document.getElementById('email')?.value.trim();
-    const telefono = document.getElementById('telefono')?.value.trim() || '';
-    const servicioSelect = document.getElementById('servicio');
-    const servicioVal = servicioSelect?.value;
-    const servicioText = servicioSelect?.options[servicioSelect.selectedIndex]?.text || servicioVal;
+    const telefono = document.getElementById('telefono')?.value.trim();
+    const servicioVal = serviceSelect?.value;
+    const servicioText = serviceSelect?.options[serviceSelect.selectedIndex]?.text || servicioVal;
     const mensaje = document.getElementById('mensaje')?.value.trim();
 
-    // Validation checks
+    // Frontend Validations
     const errors = [];
 
     if (!nombre) {
-      errors.push('El nombre completo es obligatorio.');
+      errors.push('Por favor, ingresa tu nombre completo.');
     } else if (nombre.length < 3) {
       errors.push('El nombre debe tener al menos 3 caracteres.');
-    } else if (!/^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s\.\-]+$/.test(nombre)) {
-      errors.push('El nombre solo debe contener letras y espacios.');
     }
 
     if (!email) {
-      errors.push('El correo electrónico es obligatorio.');
+      errors.push('Por favor, ingresa tu correo electrónico.');
     } else if (!isValidEmail(email)) {
-      errors.push('Por favor, ingresa un correo electrónico válido.');
+      errors.push('Ingresa un formato de correo electrónico válido.');
     }
 
     if (telefono && !isValidPhone(telefono)) {
@@ -500,7 +551,7 @@ function initContactForm() {
       errors.push('Los detalles del proyecto deben tener al menos 10 caracteres.');
     }
 
-    if (errors.length > 0) {
+    if (errors.length > 0 && formFeedback) {
       formFeedback.classList.add('error');
       formFeedback.innerHTML = `<strong>Por favor revisa los siguientes campos:</strong><br>${errors.join('<br>')}`;
       formFeedback.style.display = 'block';
@@ -525,7 +576,7 @@ function initContactForm() {
 
     try {
       // Conexión real con el endpoint del backend
-      const response = await fetch('../backend/api/contact.php', {
+      const response = await fetch('/backend/api/contact.php', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -537,9 +588,11 @@ function initContactForm() {
       const result = await response.json();
 
       if (response.ok && result.success) {
-        formFeedback.classList.add('success');
-        formFeedback.innerHTML = `<strong>¡Solicitud enviada con éxito!</strong><br>Gracias por contactarnos. Nuestro equipo revisará los detalles de tu proyecto y se comunicará contigo a la brevedad.`;
-        formFeedback.style.display = 'block';
+        if (formFeedback) {
+          formFeedback.classList.add('success');
+          formFeedback.innerHTML = `<strong>¡Solicitud enviada con éxito!</strong><br>Gracias por contactarnos. Nuestro equipo revisará los detalles de tu proyecto y se comunicará contigo a la brevedad.`;
+          formFeedback.style.display = 'block';
+        }
         contactForm.reset();
 
         // Notificar en tiempo real (1ms) al panel de administración abierto en otra pestaña
@@ -551,15 +604,19 @@ function initContactForm() {
         } catch (e) {}
       } else {
         const errorMsg = result.errors ? Object.values(result.errors).join('<br>') : (result.message || 'No se pudo enviar la solicitud.');
-        formFeedback.classList.add('error');
-        formFeedback.innerHTML = `<strong>No pudimos enviar tu mensaje:</strong><br>${errorMsg}`;
-        formFeedback.style.display = 'block';
+        if (formFeedback) {
+          formFeedback.classList.add('error');
+          formFeedback.innerHTML = `<strong>No pudimos enviar tu mensaje:</strong><br>${errorMsg}`;
+          formFeedback.style.display = 'block';
+        }
       }
     } catch (err) {
       // Fallback amigable si se ejecuta de forma local estática sin servidor
-      formFeedback.classList.add('success');
-      formFeedback.innerHTML = `<strong>¡Solicitud enviada con éxito!</strong><br>Gracias por contactarnos. Nuestro equipo revisará tu proyecto y se comunicará contigo a la brevedad.`;
-      formFeedback.style.display = 'block';
+      if (formFeedback) {
+        formFeedback.classList.add('success');
+        formFeedback.innerHTML = `<strong>¡Solicitud enviada con éxito!</strong><br>Gracias por contactarnos. Nuestro equipo revisará tu proyecto y se comunicará contigo a la brevedad.`;
+        formFeedback.style.display = 'block';
+      }
       contactForm.reset();
     } finally {
       if (submitBtn) {
@@ -586,124 +643,3 @@ function isValidPhone(phone) {
   const digits = phone.replace(/\D/g, '');
   return digits.length === 9;
 }
-
-/**
- * 5. Scrollspy for Active Nav Links (Observa exclusivamente las 4 secciones principales del scroll)
- */
-function initScrollspy() {
-  const sections = document.querySelectorAll('main > section[id]');
-  const navLinks = document.querySelectorAll('.nav-link[href^="#"]');
-
-  if (!sections.length || !navLinks.length) return;
-
-  window.addEventListener('scroll', () => {
-    let current = '';
-    const scrollPos = window.scrollY + 200;
-
-    sections.forEach(section => {
-      const sectionTop = section.offsetTop;
-      const sectionHeight = section.offsetHeight;
-
-      if (scrollPos >= sectionTop && scrollPos < sectionTop + sectionHeight) {
-        current = section.getAttribute('id');
-      }
-    });
-
-    navLinks.forEach(link => {
-      link.classList.remove('active');
-      if (link.getAttribute('href') === `#${current}`) {
-        link.classList.add('active');
-      }
-    });
-  });
-}
-
-/**
- * 6. Sistema de Diálogos y Modales Nativos (<dialog>) para Portafolio y Cotización
- */
-function initModalSystem() {
-  const modals = document.querySelectorAll('dialog.devioz-modal');
-
-  // Delegación de apertura y cierre de modales
-  document.addEventListener('click', (e) => {
-    // Abrir modal
-    const openTrigger = e.target.closest('[data-open-modal]');
-    if (openTrigger) {
-      e.preventDefault();
-      const modalId = openTrigger.getAttribute('data-open-modal');
-      const modal = document.getElementById(modalId);
-      if (modal && typeof modal.showModal === 'function') {
-        // Pre-seleccionar servicio si viene especificado
-        const serviceSlug = openTrigger.getAttribute('data-service-slug');
-        if (serviceSlug) {
-          const serviceSelect = document.getElementById('servicio');
-          if (serviceSelect) {
-            const hasOption = Array.from(serviceSelect.options).some(o => o.value === serviceSlug);
-            if (hasOption) {
-              serviceSelect.value = serviceSlug;
-            }
-          }
-        }
-        modal.showModal();
-        document.body.classList.add('modal-open');
-      }
-      return;
-    }
-
-    // Cerrar modal con botón de cierre
-    const closeTrigger = e.target.closest('[data-close-modal]');
-    if (closeTrigger) {
-      e.preventDefault();
-      const modalId = closeTrigger.getAttribute('data-close-modal');
-      const modal = document.getElementById(modalId);
-      if (modal && typeof modal.close === 'function') {
-        modal.close();
-      }
-      return;
-    }
-  });
-
-  // Manejo de clic en backdrop (light dismiss nativo seguro) y evento close
-  modals.forEach(modal => {
-    modal.addEventListener('click', (e) => {
-      // Si el clic ocurrió fuera de la caja visible del diálogo (en el backdrop)
-      const rect = modal.getBoundingClientRect();
-      const isOutside = (
-        e.clientY < rect.top ||
-        e.clientY > rect.bottom ||
-        e.clientX < rect.left ||
-        e.clientX > rect.right
-      );
-      if (isOutside) {
-        modal.close();
-      }
-    });
-
-    modal.addEventListener('close', () => {
-      // Liberar scroll del body si ya no hay ningún modal abierto
-      const anyOpen = Array.from(modals).some(m => m.open);
-      if (!anyOpen) {
-        document.body.classList.remove('modal-open');
-      }
-    });
-  });
-
-  // Abrir modal automáticamente si la URL incluye el hash respectivo
-  const hash = window.location.hash.toLowerCase();
-  if (hash === '#portafolio' || hash === '#modal-portafolio') {
-    const pModal = document.getElementById('modal-portafolio');
-    if (pModal && typeof pModal.showModal === 'function') {
-      pModal.showModal();
-      document.body.classList.add('modal-open');
-    }
-  } else if (hash === '#contacto' || hash === '#modal-cotizacion') {
-    const cModal = document.getElementById('modal-cotizacion');
-    if (cModal && typeof cModal.showModal === 'function') {
-      cModal.showModal();
-      document.body.classList.add('modal-open');
-    }
-  }
-}
-
-
-
