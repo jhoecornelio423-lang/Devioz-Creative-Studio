@@ -607,6 +607,11 @@ ul {
   align-items: center;
   gap: 0.4rem;
   margin-top: auto;
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  text-decoration: none;
 }
 
 .service-action:hover {
@@ -948,12 +953,22 @@ textarea.form-control {
   margin-bottom: 0.6rem;
 }
 
-.footer-links a {
+.footer-links a,
+.footer-links button.footer-link-btn {
   color: var(--devioz-gray);
   font-size: 0.925rem;
+  background: none;
+  border: none;
+  padding: 0;
+  font-family: inherit;
+  cursor: pointer;
+  display: inline-block;
+  text-align: left;
+  transition: color 0.2s ease, padding-left 0.2s ease;
 }
 
-.footer-links a:hover {
+.footer-links a:hover,
+.footer-links button.footer-link-btn:hover {
   color: var(--devioz-primary);
   padding-left: 4px;
 }
@@ -1112,4 +1127,172 @@ textarea.form-control {
 .footer-contact-item {
   color: var(--devioz-gray);
 }
+
+/* ==========================================================================
+   MODALES Y DIÁLOGOS NATIVOS (<dialog>) PARA PORTAFOLIO Y COTIZACIÓN
+   ========================================================================== */
+body.modal-open {
+  overflow: hidden;
+}
+
+button.nav-link {
+  background: none;
+  border: none;
+  font-family: inherit;
+  font-size: 1rem;
+  font-weight: 500;
+  color: var(--devioz-gray);
+  cursor: pointer;
+  padding: 0.5rem 0.25rem;
+  transition: color 0.2s ease;
+}
+
+button.nav-link:hover,
+button.nav-link.active {
+  color: var(--devioz-primary);
+}
+
+.devioz-modal {
+  border: 1px solid rgba(0, 194, 194, 0.4);
+  border-radius: var(--radius-md, 16px);
+  background: rgba(2, 14, 14, 0.98);
+  color: var(--devioz-white);
+  box-shadow: 0 30px 90px rgba(0, 0, 0, 0.95), 0 0 45px rgba(0, 194, 194, 0.2);
+  padding: 0;
+  max-width: 780px;
+  width: 92%;
+  max-height: 90vh;
+  margin: auto;
+  opacity: 0;
+  transform: scale(0.96) translateY(20px);
+  transition: opacity 0.25s ease, transform 0.25s ease, display 0.25s ease allow-discrete;
+  outline: none;
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  overflow: hidden;
+}
+
+.devioz-modal[open] {
+  opacity: 1;
+  transform: scale(1) translateY(0);
+}
+
+@starting-style {
+  .devioz-modal[open] {
+    opacity: 0;
+    transform: scale(0.96) translateY(20px);
+  }
+}
+
+.devioz-modal::backdrop {
+  background: rgba(1, 10, 10, 0.85);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  opacity: 0;
+  transition: opacity 0.25s ease, display 0.25s ease allow-discrete;
+}
+
+.devioz-modal[open]::backdrop {
+  opacity: 1;
+}
+
+@starting-style {
+  .devioz-modal[open]::backdrop {
+    opacity: 0;
+  }
+}
+
+.devioz-modal.modal-portafolio {
+  max-width: 1200px;
+  width: 95%;
+}
+
+.modal-cotizacion .contact-wrapper {
+  background: transparent;
+  border: none;
+  padding: 0;
+  box-shadow: none;
+  max-width: 100%;
+}
+
+.modal-content-inner {
+  padding: 2.5rem;
+  overflow-y: auto;
+  max-height: calc(90vh - 2px);
+}
+
+.modal-content-inner::-webkit-scrollbar {
+  width: 8px;
+}
+
+.modal-content-inner::-webkit-scrollbar-track {
+  background: rgba(0, 0, 0, 0.4);
+}
+
+.modal-content-inner::-webkit-scrollbar-thumb {
+  background: rgba(0, 194, 194, 0.4);
+  border-radius: 4px;
+}
+
+.modal-header {
+  position: relative;
+  margin-bottom: 2rem;
+  padding-right: 3.5rem;
+}
+
+.modal-header .section-tag {
+  margin-bottom: 0.5rem;
+}
+
+.modal-header .section-title {
+  margin-bottom: 0.5rem;
+}
+
+.modal-close-btn {
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  color: var(--devioz-gray);
+  font-size: 1.6rem;
+  line-height: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  z-index: 10;
+}
+
+.modal-close-btn:hover,
+.modal-close-btn:focus-visible {
+  background: rgba(239, 68, 68, 0.2);
+  border-color: rgba(239, 68, 68, 0.5);
+  color: #ef4444;
+  transform: scale(1.08);
+}
+
+@media (max-width: 768px) {
+  .devioz-modal {
+    width: 96%;
+    max-height: 94vh;
+  }
+  .modal-content-inner {
+    padding: 1.5rem;
+  }
+  .modal-header {
+    padding-right: 2.5rem;
+  }
+  .modal-close-btn {
+    width: 36px;
+    height: 36px;
+    font-size: 1.3rem;
+  }
+}
+
 

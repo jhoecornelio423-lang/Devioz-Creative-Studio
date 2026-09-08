@@ -8,6 +8,7 @@ document.addEventListener('DOMContentLoaded', () => {
   // Init all modules
   initHeaderScroll();
   initMobileMenu();
+  initModalSystem();
   loadPortfolio();
   loadServices();
   loadConfig();
@@ -59,7 +60,7 @@ function initHeaderScroll() {
 function initMobileMenu() {
   const toggleBtn = document.querySelector('.mobile-toggle');
   const navMenu = document.querySelector('.nav-menu');
-  const navLinks = document.querySelectorAll('.nav-link');
+  const menuItems = document.querySelectorAll('.nav-link, .nav-cta .btn');
 
   if (!toggleBtn || !navMenu) return;
 
@@ -70,9 +71,9 @@ function initMobileMenu() {
     toggleBtn.innerHTML = isOpen ? '&#10005;' : '&#9776;';
   });
 
-  // Close menu when clicking a link
-  navLinks.forEach(link => {
-    link.addEventListener('click', () => {
+  // Close menu when clicking a link or modal trigger button
+  menuItems.forEach(item => {
+    item.addEventListener('click', () => {
       navMenu.classList.remove('open');
       toggleBtn.setAttribute('aria-expanded', 'false');
       toggleBtn.innerHTML = '&#9776;';
@@ -295,9 +296,9 @@ async function loadServices() {
           <h3 class="service-title">${escapeHtml(s.titulo)}</h3>
           <p class="service-description">${escapeHtml(s.descripcion)}</p>
           ${benefitsList ? `<ul class="service-benefits">${benefitsList}</ul>` : ''}
-          <a href="#contacto" class="service-action">
+          <button type="button" class="service-action" data-open-modal="modal-cotizacion" data-service-slug="${escapeHtml(s.slug)}">
             Quiero este servicio &rarr;
-          </a>
+          </button>
         </article>
       `;
     });
@@ -587,11 +588,11 @@ function isValidPhone(phone) {
 }
 
 /**
- * 5. Scrollspy for Active Nav Links
+ * 5. Scrollspy for Active Nav Links (Observa exclusivamente las 4 secciones principales del scroll)
  */
 function initScrollspy() {
-  const sections = document.querySelectorAll('section[id]');
-  const navLinks = document.querySelectorAll('.nav-link');
+  const sections = document.querySelectorAll('main > section[id]');
+  const navLinks = document.querySelectorAll('.nav-link[href^="#"]');
 
   if (!sections.length || !navLinks.length) return;
 
@@ -616,5 +617,93 @@ function initScrollspy() {
     });
   });
 }
+
+/**
+ * 6. Sistema de Diálogos y Modales Nativos (<dialog>) para Portafolio y Cotización
+ */
+function initModalSystem() {
+  const modals = document.querySelectorAll('dialog.devioz-modal');
+
+  // Delegación de apertura y cierre de modales
+  document.addEventListener('click', (e) => {
+    // Abrir modal
+    const openTrigger = e.target.closest('[data-open-modal]');
+    if (openTrigger) {
+      e.preventDefault();
+      const modalId = openTrigger.getAttribute('data-open-modal');
+      const modal = document.getElementById(modalId);
+      if (modal && typeof modal.showModal === 'function') {
+        // Pre-seleccionar servicio si viene especificado
+        const serviceSlug = openTrigger.getAttribute('data-service-slug');
+        if (serviceSlug) {
+          const serviceSelect = document.getElementById('servicio');
+          if (serviceSelect) {
+            const hasOption = Array.from(serviceSelect.options).some(o => o.value === serviceSlug);
+            if (hasOption) {
+              serviceSelect.value = serviceSlug;
+            }
+          }
+        }
+        modal.showModal();
+        document.body.classList.add('modal-open');
+      }
+      return;
+    }
+
+    // Cerrar modal con botón de cierre
+    const closeTrigger = e.target.closest('[data-close-modal]');
+    if (closeTrigger) {
+      e.preventDefault();
+      const modalId = closeTrigger.getAttribute('data-close-modal');
+      const modal = document.getElementById(modalId);
+      if (modal && typeof modal.close === 'function') {
+        modal.close();
+      }
+      return;
+    }
+  });
+
+  // Manejo de clic en backdrop (light dismiss nativo seguro) y evento close
+  modals.forEach(modal => {
+    modal.addEventListener('click', (e) => {
+      // Si el clic ocurrió fuera de la caja visible del diálogo (en el backdrop)
+      const rect = modal.getBoundingClientRect();
+      const isOutside = (
+        e.clientY < rect.top ||
+        e.clientY > rect.bottom ||
+        e.clientX < rect.left ||
+        e.clientX > rect.right
+      );
+      if (isOutside) {
+        modal.close();
+      }
+    });
+
+    modal.addEventListener('close', () => {
+      // Liberar scroll del body si ya no hay ningún modal abierto
+      const anyOpen = Array.from(modals).some(m => m.open);
+      if (!anyOpen) {
+        document.body.classList.remove('modal-open');
+      }
+    });
+  });
+
+  // Abrir modal automáticamente si la URL incluye el hash respectivo
+  const hash = window.location.hash.toLowerCase();
+  if (hash === '#portafolio' || hash === '#modal-portafolio') {
+    const pModal = document.getElementById('modal-portafolio');
+    if (pModal && typeof pModal.showModal === 'function') {
+      pModal.showModal();
+      document.body.classList.add('modal-open');
+    }
+  } else if (hash === '#contacto' || hash === '#modal-cotizacion') {
+    const cModal = document.getElementById('modal-cotizacion');
+    if (cModal && typeof cModal.showModal === 'function') {
+      cModal.showModal();
+      document.body.classList.add('modal-open');
+    }
+  }
+}
+
 
 
