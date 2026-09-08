@@ -37,9 +37,15 @@ if ($path === 'cotizacion') {
     exit;
 }
 
+// Redireccionar planes a preguntas
 if ($path === 'planes') {
+    header('Location: /preguntas', true, 301);
+    exit;
+}
+
+if ($path === 'preguntas') {
     header('Content-Type: text/html; charset=UTF-8');
-    readfile(__DIR__ . '/frontend/planes.html');
+    readfile(__DIR__ . '/frontend/preguntas.html');
     exit;
 }
 

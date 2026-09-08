@@ -32,7 +32,8 @@ function initActiveNav() {
       (path === '/frontend/index.html' && href === '/inicio') ||
       (path === '/frontend/portafolio.html' && href === '/portafolio') ||
       (path === '/frontend/cotizacion.html' && href === '/cotizacion') ||
-      (path === '/frontend/planes.html' && href === '/planes') ||
+      (path === '/frontend/preguntas.html' && href === '/preguntas') ||
+      (path === '/frontend/planes.html' && href === '/preguntas') ||
       (path === '/frontend/blog.html' && href === '/blog')
     ) {
       link.classList.add('active');
